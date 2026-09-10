@@ -1,0 +1,120 @@
+version: "3.1"
+
+stories:
+
+# Matemática por tema/entidad
+- story: pregunta sobre álgebra
+  steps:
+    - intent: preguntar_definicion_matematica
+      entities:
+        - tema_matematica: "álgebra"
+    - action: utter_explicar_algebra
+
+- story: pregunta sobre ecuaciones lineales
+  steps:
+    - intent: preguntar_procedimiento_matematica
+      entities:
+        - concepto_matematico: "ecuación lineal"
+    - action: utter_explicar_ecuaciones
+
+- story: pregunta sobre geometría
+  steps:
+    - intent: preguntar_tema_matematica
+      entities:
+        - tema_matematica: "geometría"
+    - action: utter_explicar_geometria
+
+- story: pregunta sobre trigonometría
+  steps:
+    - intent: preguntar_tema_matematica
+      entities:
+        - tema_matematica: "trigonometría"
+    - action: utter_explicar_trigonometria
+
+- story: pregunta sobre porcentajes
+  steps:
+    - intent: preguntar_tema_matematica
+      entities:
+        - tema_matematica: "porcentajes"
+    - action: utter_explicar_porcentajes
+
+- story: pregunta sobre estadística
+  steps:
+    - intent: preguntar_tema_matematica
+      entities:
+        - tema_matematica: "estadística"
+    - action: utter_explicar_estadistica
+
+# Informática por concepto/entidad
+- story: pregunta qué es una IP
+  steps:
+    - intent: preguntar_definicion_informatica
+      entities:
+        - concepto_informatico: "ip"
+    - action: utter_explicar_ip
+
+- story: pregunta qué es un driver
+  steps:
+    - intent: preguntar_definicion_informatica
+      entities:
+        - concepto_informatico: "driver"
+    - action: utter_explicar_driver
+
+- story: pregunta diferencia router y módem
+  steps:
+    - intent: preguntar_definicion_informatica
+      entities:
+        - concepto_informatico: "router y módem"
+    - action: utter_explicar_router_modem
+
+# Flujos combinados entre módulos
+- story: saludo y luego duda de matemática
+  steps:
+    - intent: saludo
+    - action: utter_saludo
+    - intent: preguntar_tema_matematica
+      entities:
+        - tema_matematica: "álgebra"
+    - action: utter_explicar_algebra
+
+- story: saludo y luego problema de conexión
+  steps:
+    - intent: saludo
+    - action: utter_saludo
+    - intent: problema_sin_internet
+    - action: utter_problema_sin_internet
+
+- story: saludo y consulta vocacional
+  steps:
+    - intent: saludo
+    - action: utter_saludo
+    - intent: preguntar_como_elegir_carrera
+    - action: utter_como_elegir_carrera
+
+- story: consulta de horarios y agradecimiento
+  steps:
+    - intent: preguntar_horarios
+    - action: utter_horarios
+    - intent: agradecer
+    - action: utter_de_nada
+
+- story: pide recomendación de software y cómo instalarlo
+  steps:
+    - intent: pedir_recomendacion_software
+    - action: utter_recomendacion_software
+    - intent: preguntar_como_instalar_software
+    - action: utter_como_instalar_software
+
+- story: pide técnica y material de estudio
+  steps:
+    - intent: pedir_tecnica_estudio
+    - action: utter_tecnica_estudio
+    - intent: pedir_material_estudio
+    - action: utter_material_estudio
+
+- story: problema técnico resuelto y agradecimiento
+  steps:
+    - intent: problema_pc_lenta
+    - action: utter_problema_pc_lenta
+    - intent: agradecer
+    - action: utter_de_nada

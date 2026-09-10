@@ -1,0 +1,239 @@
+version: "3.1"
+
+intents:
+  # Comunes
+  - saludo
+  - despedida
+  - agradecer
+  - fuera_de_alcance
+  - trato_irrespetuoso
+  # Matemática
+  - preguntar_definicion_matematica
+  - preguntar_procedimiento_matematica
+  - preguntar_tema_matematica
+  - pedir_ejemplo
+  # Problemas técnicos de software/informática
+  - problema_sin_internet
+  - problema_pc_no_enciende
+  - problema_pc_lenta
+  - problema_pantalla_azul
+  - problema_no_hay_sonido
+  - problema_impresora
+  - problema_no_reconoce_usb
+  - problema_sospecha_virus
+  - problema_olvido_password
+  - problema_no_abre_programa
+  - preguntar_definicion_informatica
+  # Orientación Vocacional
+  - preguntar_que_es_orientacion_vocacional
+  - preguntar_como_elegir_carrera
+  - preguntar_salidas_laborales
+  - pedir_test_vocacional
+  # Información escolar
+  - preguntar_horarios
+  - preguntar_calendario_escolar
+  - preguntar_inscripcion
+  - preguntar_requisitos_documentacion
+  - preguntar_contacto_secretaria
+  # Instalación y recomendación de software
+  - pedir_recomendacion_software
+  - preguntar_como_instalar_software
+  - preguntar_software_gratuito
+  # Material y técnica de estudio
+  - pedir_tecnica_estudio
+  - pedir_material_estudio
+  - preguntar_como_organizar_tiempo
+
+entities:
+  - tema_matematica
+  - concepto_matematico
+  - dispositivo
+  - concepto_informatico
+  - carrera
+  - software
+  - materia
+
+slots:
+  tema_matematica:
+    type: text
+    influence_conversation: true
+    mappings:
+      - type: from_entity
+        entity: tema_matematica
+  concepto_matematico:
+    type: text
+    influence_conversation: true
+    mappings:
+      - type: from_entity
+        entity: concepto_matematico
+  dispositivo:
+    type: text
+    influence_conversation: true
+    mappings:
+      - type: from_entity
+        entity: dispositivo
+  concepto_informatico:
+    type: text
+    influence_conversation: true
+    mappings:
+      - type: from_entity
+        entity: concepto_informatico
+  carrera:
+    type: text
+    influence_conversation: true
+    mappings:
+      - type: from_entity
+        entity: carrera
+  software:
+    type: text
+    influence_conversation: true
+    mappings:
+      - type: from_entity
+        entity: software
+  materia:
+    type: text
+    influence_conversation: true
+    mappings:
+      - type: from_entity
+        entity: materia
+
+actions:
+  - action_ollama_fallback
+
+responses:
+  # --- Comunes ---
+  utter_saludo:
+    - text: "¡Hola! Soy el asistente virtual del colegio. Puedo ayudarte con Matemática, problemas técnicos de la PC, orientación vocacional, información escolar, instalación de software o técnicas de estudio. ¿En qué te ayudo?"
+
+  utter_despedida:
+    - text: "¡Listo! Cualquier otra consulta, acá estoy. ¡Éxitos!"
+
+  utter_explicar_sarmiento:
+    - text: "Domingo Faustino Sarmiento (1811-1888) fue un político, pedagogo, escritor y militar argentino. Fue presidente de Argentina entre 1868 y 1874, y es conocido por su impulso a la educación pública y la modernización del país. Escribió 'Facundo', una obra que analiza la sociedad argentina de su tiempo, y promovió la educación como herramienta de progreso"
+
+  utter_de_nada:
+    - text: "¡De nada! Seguí preguntando si te queda alguna duda."
+
+  utter_pedir_mas_detalle:
+    - text: "¿Podrías darme un poco más de contexto sobre lo que necesitás?"
+
+  utter_fuera_de_alcance:
+    - text: "Esa consulta no entra en los temas que puedo ayudarte (Matemática, problemas técnicos, orientación vocacional, información escolar, software o técnicas de estudio). Te recomiendo consultarlo con tu profesor/a o en secretaría."
+
+  utter_trato_irrespetuoso:
+    - text: "Estoy para ayudarte, así que te pido que mantengamos un trato respetuoso. Contame en qué te puedo ayudar y seguimos."
+
+  utter_no_entendido:
+    - text: "No estoy seguro de haber entendido bien. ¿Podés contarme un poco más sobre tu consulta?"
+
+  # --- Matemática ---
+  utter_explicar_algebra:
+    - text: "El álgebra trabaja con letras (variables) que representan números desconocidos. Por ejemplo, en 2x + 3 = 7, 'x' es el valor que tenés que encontrar. El objetivo suele ser 'despejar' la variable: dejarla sola de un lado de la igualdad, aplicando la misma operación a ambos lados."
+
+  utter_explicar_ecuaciones:
+    - text: "Para resolver una ecuación lineal seguí estos pasos: 1) Agrupá los términos con la variable de un lado y los números del otro. 2) Sumá o restá lo necesario en ambos lados para simplificar. 3) Dividí para dejar la variable sola. Ejemplo: 2x + 3 = 7 → 2x = 4 → x = 2."
+
+  utter_explicar_geometria:
+    - text: "La geometría estudia figuras, sus medidas y sus relaciones (perímetro, área, ángulos, volumen). Por ejemplo, el área de un rectángulo es base por altura, y el área de un triángulo es (base por altura) dividido 2."
+
+  utter_explicar_trigonometria:
+    - text: "La trigonometría estudia la relación entre los ángulos y los lados de un triángulo rectángulo. Las tres razones principales son seno, coseno y tangente, que relacionan un ángulo con los lados del triángulo (opuesto, adyacente e hipotenusa)."
+
+  utter_explicar_porcentajes:
+    - text: "Un porcentaje representa una parte de 100. Para calcular el X% de un número, multiplicás el número por X y dividís por 100. Ejemplo: el 20% de 50 es (50 × 20) / 100 = 10."
+
+  utter_explicar_estadistica:
+    - text: "La estadística básica trabaja con datos: promedio (sumar todos los valores y dividir por la cantidad), moda (el valor que más se repite) y mediana (el valor del medio al ordenar los datos)."
+
+  # --- Problemas técnicos / Informática ---
+  utter_problema_sin_internet:
+    - text: "Vamos por partes: 1) Fijate si el ícono de red muestra una X o un triángulo de advertencia. 2) Probá desconectar y reconectar el cable de red o el wifi. 3) Abrí una terminal (cmd o consola) y ejecutá 'ipconfig' (Windows) o 'ip a' (Linux) para ver si tenés una IP asignada. 4) Si la IP empieza con 169.254, el equipo no está recibiendo dirección del router: probá reiniciar el equipo de red. Si nada funciona, avisá al soporte técnico del colegio."
+
+  utter_problema_pc_no_enciende:
+    - text: "Revisemos lo básico primero: 1) Verificá que el cable de alimentación esté bien conectado y que la zapatilla/tomacorriente tenga energía. 2) Fijate si hay alguna luz o sonido del ventilador al presionar el botón de encendido. 3) Si es notebook, probá conectarla sin batería, solo con el cargador. 4) Si no hay ninguna señal de vida (ni luces ni ruido), es un tema de hardware y hay que derivarlo al soporte técnico del colegio."
+
+  utter_problema_pc_lenta:
+    - text: "Para diagnosticar la lentitud: 1) Abrí el Administrador de Tareas (Ctrl+Shift+Esc en Windows) y fijate qué proceso consume más CPU, memoria o disco. 2) Revisá cuántos programas se abren automáticamente al iniciar el sistema y desactivá los que no necesites. 3) Verificá el espacio libre en el disco: si queda menos del 10-15%, eso también ralentiza el equipo. 4) Si el uso de disco está siempre al 100% sin motivo aparente, puede ser un disco mecánico viejo o falta de mantenimiento."
+
+  utter_problema_pantalla_azul:
+    - text: "Una pantalla azul (BSOD) suele indicar un error grave del sistema o de un controlador (driver). Pasos: 1) Anotá el código de error que aparece en la pantalla (por ejemplo, 'MEMORY_MANAGEMENT' o 'IRQL_NOT_LESS_OR_EQUAL'). 2) Reiniciá el equipo y fijate si se repite. 3) Si se repite, puede ser un driver desactualizado o un problema de memoria RAM. Este diagnóstico conviene hacerlo con el soporte técnico del colegio, ya que puede requerir herramientas específicas."
+
+  utter_problema_no_hay_sonido:
+    - text: "Para resolver la falta de sonido: 1) Verificá que el volumen no esté en 0 o silenciado, tanto en el sistema como en los parlantes/auriculares. 2) Fijate en la bandeja del sistema si el ícono de sonido tiene una X. 3) Entrá a Configuración > Sonido y confirmá que el dispositivo de salida correcto esté seleccionado. 4) Si nada funciona, puede ser un problema del driver de audio, que hay que reinstalar con ayuda del soporte técnico."
+
+  utter_problema_impresora:
+    - text: "Para problemas de impresora: 1) Verificá que esté encendida y conectada (USB o red). 2) Fijate si hay un mensaje de error en la pantalla de la impresora (papel atascado, falta de tinta/tóner). 3) En la PC, revisá que la impresora esté configurada como predeterminada y que la cola de impresión no tenga trabajos trabados. 4) Si sigue sin funcionar, puede ser un problema del driver o de la conexión de red, y conviene avisar al soporte técnico."
+
+  utter_problema_no_reconoce_usb:
+    - text: "Si la PC no reconoce un USB: 1) Probá el mismo USB en otro puerto o en otra PC, para descartar que el dispositivo esté dañado. 2) Fijate en el Administrador de Dispositivos si aparece con un signo de exclamación amarillo (eso indica un problema de driver). 3) Probá reiniciar el equipo con el USB ya conectado. 4) Si el USB no aparece en ningún equipo, probablemente el dispositivo esté dañado."
+
+  utter_problema_sospecha_virus:
+    - text: "Si sospechás que hay un virus o malware: 1) No ingreses contraseñas ni datos personales hasta resolverlo. 2) Desconectá el equipo de la red (wifi o cable) para evitar que se propague. 3) Avisá inmediatamente al soporte técnico del colegio; no intentes borrar archivos del sistema por tu cuenta, porque podés empeorar el problema. 4) Si tenés un antivirus instalado, podés correr un análisis completo mientras esperás ayuda."
+
+  utter_problema_olvido_password:
+    - text: "Si olvidaste tu contraseña, no puedo restablecerla por vos: por seguridad, eso lo tiene que gestionar el soporte técnico o el administrador de la red del colegio, con tu identificación correspondiente. Te recomiendo acercarte a esa área con tu credencial de alumno."
+
+  utter_problema_no_abre_programa:
+    - text: "Cuando un programa no abre: 1) Fijate si aparece algún mensaje de error al intentar abrirlo. 2) Probá reiniciar el equipo, a veces un proceso quedó colgado en segundo plano. 3) Verificá que el programa esté bien instalado (podés reinstalarlo si tenés el instalador). 4) Si el error menciona una 'dll faltante' o algo similar, avisá al soporte técnico, ya que puede requerir reinstalar componentes del sistema."
+
+  utter_explicar_ip:
+    - text: "Una dirección IP es un número único que identifica a un dispositivo dentro de una red, similar a una dirección postal. Permite que los equipos se encuentren entre sí para enviarse información."
+
+  utter_explicar_driver:
+    - text: "Un driver (controlador) es un programa que permite que el sistema operativo se comunique correctamente con una pieza de hardware, como la placa de video, el audio o la impresora. Sin el driver correcto, el hardware puede no funcionar o funcionar mal."
+
+  utter_explicar_router_modem:
+    - text: "El módem convierte la señal que llega del proveedor de internet en una señal que tu red puede usar. El router distribuye esa conexión a los distintos dispositivos de tu casa o colegio, por cable o wifi. Muchas veces vienen combinados en un mismo equipo."
+
+  # --- Orientación Vocacional (esquema genérico) ---
+  utter_que_es_orientacion_vocacional:
+    - text: "La orientación vocacional es un proceso que te ayuda a identificar tus intereses, habilidades y valores para elegir qué estudiar o a qué dedicarte después del colegio. No te da una respuesta única, sino que te acompaña a pensar mejor la decisión."
+
+  utter_como_elegir_carrera:
+    - text: "Para elegir una carrera podés pensar en tres cosas: 1) Qué materias o actividades del colegio te resultan más interesantes. 2) En qué tareas sentís que sos bueno/a o das más lo mejor de vos. 3) Qué tipo de trabajo te imaginás haciendo a futuro (con otras personas, con datos, al aire libre, etc.). [COMPLETAR: agregar aquí información sobre orientadores del colegio, si hay charlas vocacionales o convenios con universidades/institutos]."
+
+  utter_salidas_laborales:
+    - text: "[COMPLETAR: agregar aquí las salidas laborales específicas de las especialidades que dicta el colegio, por ejemplo técnico en Informática, Electrónica, etc.]. Si querés, contame qué especialidad cursás o te interesa y te doy más detalle."
+
+  utter_test_vocacional:
+    - text: "[COMPLETAR: agregar aquí link o referencia a un test vocacional que use el colegio, o el contacto del gabinete de orientación vocacional]. Mientras tanto, te recomiendo anotar qué materias y actividades disfrutás más, eso ya es un buen punto de partida."
+
+  # --- Información escolar (esquema genérico) ---
+  utter_horarios:
+    - text: "[COMPLETAR: agregar aquí los horarios de cursada por turno/división, y horario de secretaría]."
+
+  utter_calendario_escolar:
+    - text: "[COMPLETAR: agregar aquí fechas clave del calendario escolar: inicio y fin de clases, vacaciones, mesas de examen, actos]."
+
+  utter_inscripcion:
+    - text: "[COMPLETAR: agregar aquí el proceso de inscripción o reinscripción, fechas y documentación necesaria]."
+
+  utter_requisitos_documentacion:
+    - text: "[COMPLETAR: agregar aquí la documentación requerida para trámites frecuentes: certificado de alumno regular, libreta, pase, etc.]."
+
+  utter_contacto_secretaria:
+    - text: "[COMPLETAR: agregar aquí el horario de atención y medio de contacto de secretaría/preceptoría]."
+
+  # --- Instalación y recomendación de software ---
+  utter_recomendacion_software:
+    - text: "Depende de para qué lo necesites. Por ejemplo: para escribir documentos, LibreOffice o Google Docs (gratuitos); para programar, Visual Studio Code; para diseño básico, GIMP (alternativa gratuita a Photoshop). Contame para qué materia o tarea lo necesitás y te recomiendo algo más puntual."
+
+  utter_como_instalar_software:
+    - text: "Pasos generales para instalar un programa: 1) Descargalo solo desde la página oficial del software, nunca de sitios de terceros. 2) Ejecutá el instalador y seguí los pasos (por lo general 'Siguiente > Siguiente > Instalar'). 3) Si pide permisos de administrador y estás en una PC del colegio, consultá antes con el encargado del laboratorio. 4) Al terminar, abrí el programa para confirmar que funciona correctamente."
+
+  utter_software_gratuito:
+    - text: "Para uso educativo hay buenas alternativas gratuitas: LibreOffice (en vez de Microsoft Office), GIMP (en vez de Photoshop), Visual Studio Code (para programar), OBS Studio (para grabar pantalla). [COMPLETAR: agregar aquí si el colegio tiene licencias propias de algún software, ej. Office 365 educativo]."
+
+  # --- Material y técnica de estudio ---
+  utter_tecnica_estudio:
+    - text: "Algunas técnicas que funcionan bien: 1) Estudiar en bloques de 25-30 minutos con pausas cortas (técnica Pomodoro). 2) Resumir con tus propias palabras en vez de solo releer. 3) Autoevaluarte con preguntas antes del examen, no solo repasar. 4) Repartir el estudio en varios días en vez de concentrarlo la noche anterior."
+
+  utter_material_estudio:
+    - text: "[COMPLETAR: agregar aquí dónde encontrar el material de estudio del colegio: plataforma virtual, drive compartido, biblioteca, apuntes por materia]."
+
+  utter_como_organizar_tiempo:
+    - text: "Para organizar el tiempo de estudio: 1) Anotá todas las fechas de entregas y exámenes en un solo lugar (calendario o agenda). 2) Priorizá lo que vence antes o lo que más te cuesta. 3) Asigná bloques fijos de estudio en la semana, no solo 'cuando tengas tiempo'. 4) Dejá un margen para imprevistos."
+
+session_config:
+  session_expiration_time: 60
+  carry_over_slots_to_new_session: true

@@ -1,0 +1,28 @@
+version: "2.0"
+
+rules:
+- rule: respond_dashboard_suma_matematica
+  steps:
+  - intent: dashboard_suma_matematica
+  - action: utter_dashboard_suma_matematica
+
+- rule: respond_dashboard_resta_matematica
+  steps:
+  - intent: dashboard_resta_matematica
+  - action: utter_dashboard_resta_matematica
+
+- rule: respond_dashboard_proceres_sarmiento
+  steps:
+  - intent: dashboard_proceres_sarmiento
+  - action: utter_dashboard_proceres_sarmiento
+
+- rule: respond_dashboard_proceres_san_martin
+  steps:
+  - intent: dashboard_proceres_san_martin
+  - action: utter_dashboard_proceres_san_martin
+
+- rule: respond_dashboard_saludar
+  steps:
+  - intent: dashboard_saludar
+  - action: utter_dashboard_saludar
+

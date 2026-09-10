@@ -1,0 +1,132 @@
+pipeline:
+- name: WhitespaceTokenizer
+- name: RegexFeaturizer
+- name: LexicalSyntacticFeaturizer
+- name: CountVectorsFeaturizer
+- name: CountVectorsFeaturizer
+  analyzer: char_wb
+  min_ngram: 1
+  max_ngram: 4
+- name: DIETClassifier
+  epochs: 100
+- name: EntitySynonymMapper
+- name: ResponseSelector
+  epochs: 100
+- name: FallbackClassifier
+  threshold: 0.75
+  ambiguity_threshold: 0.15
+
+policies:
+- name: MemoizationPolicy
+- name: RulePolicy
+- name: UnexpecTEDIntentPolicy
+  max_history: 5
+  epochs: 100
+- name: TEDPolicy
+  max_history: 5
+  epochs: 100
+
+intents:
+  - dashboard_suma_matematica
+  - dashboard_resta_matematica
+  - dashboard_proceres_sarmiento
+  - dashboard_proceres_san_martin
+  - dashboard_saludar
+
+entities:
+  - tema_matematica
+  - concepto_matematico
+  - dispositivo
+  - concepto_informatico
+  - carrera
+  - software
+  - materia
+
+slots: {}
+
+actions:
+  - utter_dashboard_suma_matematica
+  - utter_dashboard_resta_matematica
+  - utter_dashboard_proceres_sarmiento
+  - utter_dashboard_proceres_san_martin
+  - utter_dashboard_saludar
+
+forms: {}
+
+e2e_actions: []
+
+responses:
+  utter_dashboard_suma_matematica:
+    - text: ""
+
+  utter_dashboard_resta_matematica:
+    - text: ""
+
+  utter_dashboard_proceres_sarmiento:
+    - text: "Sarmiento es el encargado de que suframos en la escuela."
+
+  utter_dashboard_proceres_san_martin:
+    - text: "San martin cruzó los Andes"
+
+  utter_dashboard_saludar:
+    - text: "Hola! soy A.U.R.A, el chatbot de la EPET N°3"
+
+session_config:
+  session_expiration_time: 60
+  carry_over_slots_to_new_session: true
+
+nlu:
+- intent: dashboard_suma_matematica
+  examples: |
+    - suma_matematica
+
+- intent: dashboard_resta_matematica
+  examples: |
+    - resta_matematica
+
+- intent: dashboard_proceres_sarmiento
+  examples: |
+    - Juan Domingo Sarmiento
+    - Juan Sarmiento
+
+- intent: dashboard_proceres_san_martin
+  examples: |
+    - Jose de San Martin
+    - San Martin
+
+- intent: dashboard_saludar
+  examples: |
+    - hola!
+    - hola
+    - como andas
+    - que haces
+
+rules:
+
+- rule: respond_dashboard_suma_matematica
+  steps:
+  - intent: dashboard_suma_matematica
+  - action: utter_dashboard_suma_matematica
+
+- rule: respond_dashboard_resta_matematica
+  steps:
+  - intent: dashboard_resta_matematica
+  - action: utter_dashboard_resta_matematica
+
+- rule: respond_dashboard_proceres_sarmiento
+  steps:
+  - intent: dashboard_proceres_sarmiento
+  - action: utter_dashboard_proceres_sarmiento
+
+- rule: respond_dashboard_proceres_san_martin
+  steps:
+  - intent: dashboard_proceres_san_martin
+  - action: utter_dashboard_proceres_san_martin
+
+- rule: respond_dashboard_saludar
+  steps:
+  - intent: dashboard_saludar
+  - action: utter_dashboard_saludar
+
+stories:
+

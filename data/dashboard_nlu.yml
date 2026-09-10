@@ -1,0 +1,28 @@
+version: "2.0"
+
+nlu:
+- intent: dashboard_suma_matematica
+  examples: |
+    - suma_matematica
+
+- intent: dashboard_resta_matematica
+  examples: |
+    - resta_matematica
+
+- intent: dashboard_proceres_sarmiento
+  examples: |
+    - Juan Domingo Sarmiento
+    - Juan Sarmiento
+
+- intent: dashboard_proceres_san_martin
+  examples: |
+    - Jose de San Martin
+    - San Martin
+
+- intent: dashboard_saludar
+  examples: |
+    - hola!
+    - hola
+    - como andas
+    - que haces
+

@@ -1,0 +1,519 @@
+version: "3.1"
+
+nlu:
+- intent: saludo
+  examples: |
+    - hola
+    - holaa
+    - holis
+    - buenas
+    - buen día
+    - buenos días
+    - buenas tardes
+    - buenas noches
+    - hola, necesito ayuda
+    - hey
+    - hey bot
+    - hola bot
+    - hola, tengo un problema
+    - hola, necesito ayuda con algo
+    - hola, tengo una consulta
+    - hola quería preguntarte algo
+    - hola disculpá
+    - se puede
+    - epa
+    - qué tal
+    - cómo andás
+    - buenas, alguien ahí
+
+- intent: despedida
+  examples: |
+    - chau
+    - chau, gracias
+    - nos vemos
+    - gracias, nos vemos
+    - hasta luego
+    - hasta la próxima
+    - eso es todo
+    - listo, gracias
+    - listo eso era todo
+    - adiós
+    - bye
+    - dale, gracias
+    - listo, ya se solucionó
+    - ya está, gracias
+    - perfecto eso necesitaba, chau
+    - nada más, gracias
+    - ok listo
+
+- intent: agradecer
+  examples: |
+    - gracias
+    - graciasss
+    - muchas gracias
+    - te agradezco
+    - te agradezco mucho
+    - genial, gracias
+    - perfecto, muchas gracias
+    - muchas gracias, me sirvió
+    - buenísimo, gracias
+    - excelente, gracias por la ayuda
+    - mil gracias
+    - joya, gracias
+    - dale gracias
+    - me sirvió mucho gracias
+
+- intent: trato_irrespetuoso
+  examples: |
+    - sos re tonto
+    - sos un inútil
+    - no servís para nada
+    - este bot es una porquería
+    - andate a la mierda
+    - sos un boludo
+    - qué bot más pelotudo
+    - no entendés nada, sos malísimo
+    - sos un pelotudo
+    - la concha de tu madre
+    - andate al carajo
+    - sos un anormal
+    - qué mierda de bot
+    - sos un desastre esto no sirve
+    - callate
+    - sos un idiota
+    - dejate de joder
+    - esto es una mierda
+    - sos un boludo de mierda
+    - no entendés un carajo
+
+- intent: fuera_de_alcance
+  examples: |
+    - se me colgó la computadora
+    - no tengo wifi
+    - a qué hora sale el recreo
+    - cuándo son las vacaciones
+    - quién es el director del colegio
+    - se rompió el proyector
+    - a qué hora entra el profesor de historia
+    - tengo que rendir mañana
+    - qué tarea hay para el lunes
+    - cuál es la capital de francia
+    - contame un chiste
+    - quién ganó el mundial
+    - cómo estás
+    - qué hora es
+    - me podés ayudar con la tarea de historia
+    - qué clima hace hoy
+    - me contás sobre la revolución de mayo
+    - hoy hay clases
+    - hay paro mañana
+    - quién es tu creador
+
+# --- Matemática ---
+- intent: preguntar_definicion_matematica
+  examples: |
+    - qué es una ecuación
+    - qué es el [álgebra](tema_matematica)
+    - qué significa [porcentaje](concepto_matematico)
+    - qué es la [trigonometría](tema_matematica)
+    - qué es un [ángulo](concepto_matematico)
+    - podés explicarme qué es una [variable](concepto_matematico)
+    - no entiendo qué es la [mediana](concepto_matematico)
+    - qué significa [coseno](concepto_matematico)
+    - definición de [área](concepto_matematico)
+    - qué es un [triángulo rectángulo](concepto_matematico)
+    - explicame qué es la [estadística](tema_matematica)
+    - qué es [geometría](tema_matematica)
+    - qué es una [función](concepto_matematico)
+    - qué es un [número primo](concepto_matematico)
+    - no sé qué es la [moda](concepto_matematico) en estadística
+    - qué significa [perímetro](concepto_matematico)
+    - qué es un [polígono](concepto_matematico)
+    - definime qué es una [incógnita](concepto_matematico)
+    - qué quiere decir [proporcional](concepto_matematico)
+    - no entiendo el concepto de [pendiente](concepto_matematico)
+    - qué es [tangente](concepto_matematico) en trigonometría
+    - me explicás qué es una [potencia](concepto_matematico)
+    - qué es [raíz cuadrada](concepto_matematico)
+    - qué es un [número racional](concepto_matematico)
+
+- intent: preguntar_procedimiento_matematica
+  examples: |
+    - cómo resuelvo una ecuación
+    - cómo se despeja una [ecuación lineal](concepto_matematico)
+    - cómo calculo el [área de un triángulo](concepto_matematico)
+    - cómo saco el [porcentaje](concepto_matematico) de un número
+    - cómo calculo el [promedio](concepto_matematico)
+    - pasos para resolver [2x + 3 = 7](concepto_matematico)
+    - cómo hago para despejar la x
+    - cómo calculo la [mediana](concepto_matematico) de una lista de datos
+    - cómo se calcula el [seno de un ángulo](concepto_matematico)
+    - cómo resuelvo un ejercicio de [porcentajes](tema_matematica)
+    - podés guiarme paso a paso para resolver una ecuación
+    - cómo calculo el perímetro de un rectángulo
+    - cómo se resuelve un sistema de ecuaciones
+    - cómo saco el área de un círculo
+    - cómo hago para simplificar una fracción
+    - cómo se calcula el volumen de un cubo
+    - cómo despejo una incógnita en una ecuación de segundo grado
+    - cómo saco el 15% de un número
+    - cómo se hace una regla de tres simple
+    - pasos para graficar una función lineal
+    - cómo calculo la hipotenusa de un triángulo
+    - cómo resuelvo esto: 3x - 5 = 10
+    - no me sale este ejercicio de álgebra, cómo lo resuelvo
+    - cómo saco el máximo común divisor
+
+- intent: preguntar_tema_matematica
+  examples: |
+    - tengo dudas de [álgebra](tema_matematica)
+    - necesito ayuda con [geometría](tema_matematica)
+    - no entiendo [trigonometría](tema_matematica)
+    - tengo una duda de [porcentajes](tema_matematica)
+    - me cuesta la [estadística](tema_matematica)
+    - ayuda con [ecuaciones](tema_matematica)
+    - tema: [funciones](tema_matematica)
+    - estoy trabado con [álgebra](tema_matematica)
+    - tengo un ejercicio de [geometría](tema_matematica) que no me sale
+    - no entiendo nada de [trigonometría](tema_matematica)
+    - me podés ayudar con [porcentajes](tema_matematica)
+    - tengo que estudiar [estadística](tema_matematica) y no entiendo nada
+    - necesito repasar [álgebra](tema_matematica) para el examen
+    - estoy perdido con [geometría](tema_matematica)
+    - tengo una prueba de [funciones](tema_matematica) y no entiendo el tema
+    - me ayudás con un tema de [matemática](tema_matematica)
+    - no le encuentro la vuelta a [trigonometría](tema_matematica)
+
+- intent: pedir_ejemplo
+  examples: |
+    - me das un ejemplo
+    - podés darme un ejemplo de ecuación
+    - un ejemplo de porcentaje
+    - dame un ejercicio resuelto
+    - mostrame un caso práctico
+    - tenés algún ejemplo de área de un triángulo
+    - me pasás un ejemplo
+    - dame un ejemplo más concreto
+    - tenés un ejercicio de ejemplo
+    - me mostrás cómo se hace con un caso real
+    - dame un ejemplo de la vida real
+
+# --- Problemas técnicos / Informática ---
+- intent: problema_sin_internet
+  examples: |
+    - no tengo internet
+    - no me conecto al [wifi](dispositivo)
+    - se cortó la conexión
+    - la red no funciona
+    - no carga ninguna página
+    - el [router](dispositivo) no anda
+    - internet muy lento o no carga nada
+    - dice "sin conexión" en la pantalla
+    - no puedo entrar a internet en el laboratorio
+    - se desconecta solo del wifi
+    - no anda el internet
+    - no tengo señal de wifi
+    - el [wifi](dispositivo) del colegio no aparece
+    - se me corta la conexión todo el tiempo
+    - no puedo entrar a la plataforma virtual por falta de internet
+    - dice "no hay conexión a internet"
+    - internet no funciona en el aula
+    - la [notebook](dispositivo) no encuentra ninguna red wifi
+    - no carga google
+    - tengo el wifi conectado pero no navega
+
+- intent: problema_pc_no_enciende
+  examples: |
+    - la [pc](dispositivo) no enciende
+    - no prende la [computadora](dispositivo)
+    - apreto el botón y no pasa nada
+    - la [notebook](dispositivo) no arranca
+    - no hay luces al encenderla
+    - se apaga sola apenas la prendo
+    - el [monitor](dispositivo) no muestra nada al encender la pc
+    - no prende ninguna luz
+    - la pc no responde al botón de encendido
+    - se queda la pantalla negra al prender la pc
+    - la [notebook](dispositivo) no carga y no prende
+    - apreté el botón de encendido y no hizo nada
+    - se apaga la pc apenas la enciendo
+
+- intent: problema_pc_lenta
+  examples: |
+    - la pc está muy lenta
+    - tarda mucho en abrir los programas
+    - se cuelga todo el tiempo
+    - la [computadora](dispositivo) va muy lenta
+    - tarda una eternidad en iniciar
+    - se traba constantemente
+    - la pc va como el orto de lenta
+    - tarda siglos en abrir cualquier cosa
+    - se congela la pantalla seguido
+    - todo tarda una banda en cargar
+    - la [notebook](dispositivo) se re cuelga
+    - anda lentísima la máquina
+    - se tilda todo el tiempo
+
+- intent: problema_pantalla_azul
+  examples: |
+    - me apareció una pantalla azul
+    - se reinició solo con una pantalla azul
+    - pantalla azul de la muerte
+    - error de pantalla azul en windows
+    - aparece un código de error azul
+    - se puso toda azul la pantalla y se reinició
+    - me tira una pantalla azul con letras raras
+    - la pc se reinicia sola con un error azul
+
+- intent: problema_no_hay_sonido
+  examples: |
+    - no tengo sonido
+    - no escucho nada de los [parlantes](dispositivo)
+    - no funciona el audio
+    - los [auriculares](dispositivo) no suenan
+    - no sale sonido de la pc
+    - no hay audio en ningún video
+    - se me fue el sonido de la nada
+    - conecté los [auriculares](dispositivo) y no suena nada
+    - el audio no anda en esta pc
+
+- intent: problema_impresora
+  examples: |
+    - la [impresora](dispositivo) no imprime
+    - no reconoce la impresora
+    - se traba la cola de impresión
+    - la impresora dice error
+    - no puedo imprimir el trabajo
+    - la [impresora](dispositivo) tira hojas en blanco
+    - mandé a imprimir y no pasa nada
+    - se atascó el papel en la impresora
+    - la impresora no aparece en la lista de dispositivos
+
+- intent: problema_no_reconoce_usb
+  examples: |
+    - no reconoce el [pendrive](dispositivo)
+    - no aparece el [usb](dispositivo) conectado
+    - no detecta el dispositivo usb
+    - el [pendrive](dispositivo) no figura en mi pc
+    - conecté el [pendrive](dispositivo) y no pasa nada
+    - la pc no me deja ver el contenido del usb
+    - no me deja abrir el pendrive
+
+- intent: problema_sospecha_virus
+  examples: |
+    - creo que tengo un virus
+    - me aparecen ventanas raras solas
+    - la pc actúa rara, puede ser un virus
+    - se instalaron programas que no bajé
+    - sospecho que hay malware
+    - me aparecen anuncios todo el tiempo sin querer
+    - se abren pestañas solas en el navegador
+    - creo que descargué algo con virus
+    - la pc anda muy rara desde que instalé un programa
+
+- intent: problema_olvido_password
+  examples: |
+    - me olvidé la contraseña
+    - no puedo entrar a mi cuenta
+    - olvidé mi clave del colegio
+    - no recuerdo la password de mi usuario
+    - me bloquearon la cuenta por poner mal la contraseña
+    - no me deja entrar, dice contraseña incorrecta
+    - perdí mi usuario y contraseña del colegio
+
+- intent: problema_no_abre_programa
+  examples: |
+    - no me abre el programa
+    - el programa se cierra solo
+    - no puedo abrir [word](dispositivo)
+    - da error al iniciar la aplicación
+    - no responde el programa
+    - hago doble clic y no abre nada
+    - el programa se cuelga al abrir
+    - me tira un error apenas abro la app
+
+- intent: preguntar_definicion_informatica
+  examples: |
+    - qué es una [ip](concepto_informatico)
+    - qué es un [driver](concepto_informatico)
+    - para qué sirve el [router](concepto_informatico)
+    - qué diferencia hay entre [router y módem](concepto_informatico)
+    - qué es un [controlador](concepto_informatico)
+    - qué es una [red lan](concepto_informatico)
+    - qué es el [dns](concepto_informatico)
+    - qué significa [http](concepto_informatico)
+    - qué es un [firewall](concepto_informatico)
+    - para qué sirve un [switch](concepto_informatico)
+    - qué es la [nube](concepto_informatico)
+    - qué diferencia hay entre [hardware y software](concepto_informatico)
+
+# --- Orientación Vocacional ---
+- intent: preguntar_que_es_orientacion_vocacional
+  examples: |
+    - qué es la orientación vocacional
+    - para qué sirve la orientación vocacional
+    - no sé qué es eso de orientación vocacional
+    - me pueden explicar qué es orientación vocacional
+    - qué significa orientación vocacional
+    - de qué se trata la orientación vocacional
+    - nunca escuché hablar de orientación vocacional, qué es
+
+- intent: preguntar_como_elegir_carrera
+  examples: |
+    - cómo elijo una carrera
+    - no sé qué estudiar
+    - cómo sé qué carrera me conviene
+    - tengo dudas de qué seguir estudiando
+    - cómo decido qué carrera seguir
+    - estoy perdido con qué estudiar después del colegio
+    - qué puedo estudiar
+    - qué puedo estudiar si me gustan las computadoras
+    - qué puedo estudiar si me gusta la tecnología
+    - qué carrera me conviene si me gusta programar
+    - qué puedo estudiar relacionado a lo que veo en el colegio
+    - no tengo idea de qué hacer después de la secundaria
+    - no sé qué voy a hacer cuando termine el colegio
+    - qué estudio si me gusta arreglar cosas
+    - qué carrera me conviene si soy bueno con los números
+    - no sé si seguir estudiando o trabajar
+    - qué puedo estudiar si me gusta el diseño
+    - qué me conviene estudiar
+    - tengo que elegir qué hacer después del secundario y no sé
+    - estoy indeciso entre dos carreras
+    - cómo me doy cuenta de qué me gusta para estudiar
+
+- intent: preguntar_salidas_laborales
+  examples: |
+    - qué salida laboral tiene [informática](carrera)
+    - en qué puedo trabajar si estudio [electrónica](carrera)
+    - qué trabajos hay relacionados a mi especialidad
+    - dónde puedo trabajar con este título técnico
+    - de qué puedo trabajar con el título de [técnico en informática](carrera)
+    - qué salidas laborales tiene [electromecánica](carrera)
+    - en qué empresas puedo trabajar con esta especialidad
+    - qué trabajo consigo apenas termino el colegio técnico
+
+- intent: pedir_test_vocacional
+  examples: |
+    - hay algún test vocacional
+    - dónde puedo hacer un test vocacional
+    - quiero hacer un test de orientación vocacional
+    - tienen algo para saber qué carrera me conviene
+    - hay algún test para saber qué estudiar
+    - dónde hago el test de orientación vocacional del colegio
+
+# --- Información escolar ---
+- intent: preguntar_horarios
+  examples: |
+    - cuál es el horario de clases
+    - a qué hora entro
+    - cuándo es el horario de mi división
+    - horario de secretaría
+    - a qué hora abre secretaría
+    - a qué hora salgo hoy
+    - cuál es mi horario de cursada
+    - a qué hora empiezan las clases
+    - hasta qué hora atiende secretaría
+    - qué horario tiene el turno tarde
+
+- intent: preguntar_calendario_escolar
+  examples: |
+    - cuándo empiezan las clases
+    - cuándo son las vacaciones de invierno
+    - cuándo son las mesas de examen
+    - fechas del calendario escolar
+    - cuándo terminan las clases este año
+    - cuándo es el próximo acto escolar
+    - qué día no hay clases
+    - cuándo son las mesas de diciembre
+
+- intent: preguntar_inscripcion
+  examples: |
+    - cómo me inscribo
+    - cómo hago la reinscripción
+    - dónde me anoto para el próximo año
+    - qué tengo que hacer para inscribirme
+    - hasta cuándo puedo inscribirme
+    - cómo hago para anotarme a una materia
+    - dónde se hace la inscripción
+
+- intent: preguntar_requisitos_documentacion
+  examples: |
+    - qué documentación necesito para el certificado de alumno regular
+    - qué papeles hacen falta para el pase
+    - qué necesito para sacar la libreta
+    - requisitos para tramitar el certificado de estudios
+    - qué necesito llevar para pedir el certificado
+    - qué documentos hacen falta para el pase a otro colegio
+
+- intent: preguntar_contacto_secretaria
+  examples: |
+    - cómo contacto a secretaría
+    - a qué hora atiende secretaría
+    - dónde puedo hablar con preceptoría
+    - teléfono de la escuela
+    - cómo me comunico con la escuela
+    - hay algún mail de contacto de secretaría
+
+# --- Instalación y recomendación de software ---
+- intent: pedir_recomendacion_software
+  examples: |
+    - qué programa me recomendás para editar documentos
+    - qué software uso para programar
+    - qué programa gratuito hay para diseño
+    - me recomendás algún editor de texto
+    - qué uso en vez de photoshop
+    - qué programa me conviene para hacer una presentación
+    - qué editor de código me recomendás
+    - qué uso para editar fotos gratis
+    - qué programa sirve para hacer diagramas de red
+
+- intent: preguntar_como_instalar_software
+  examples: |
+    - cómo instalo un programa
+    - cómo instalo [visual studio code](software)
+    - pasos para instalar software
+    - cómo bajo e instalo un programa de forma segura
+    - cómo instalo [python](software) en mi pc
+    - dónde descargo e instalo un programa sin virus
+    - cómo hago para instalar algo en la pc del colegio
+
+- intent: preguntar_software_gratuito
+  examples: |
+    - hay alguna alternativa gratuita a office
+    - qué programas gratuitos me recomendás
+    - necesito software gratis para estudiar
+    - hay versiones gratis de estos programas
+    - qué opciones gratis hay para editar video
+    - hay alguna alternativa gratis a photoshop
+
+# --- Material y técnica de estudio ---
+- intent: pedir_tecnica_estudio
+  examples: |
+    - qué técnica de estudio me recomendás
+    - cómo estudio mejor
+    - tips para estudiar
+    - cómo memorizo mejor para un examen
+    - cómo puedo estudiar de forma más efectiva
+    - cómo hago para concentrarme al estudiar
+    - qué técnicas hay para estudiar más rápido
+    - cómo me preparo mejor para un parcial
+    - tengo examen mañana y no sé cómo organizarme para estudiar
+
+- intent: pedir_material_estudio
+  examples: |
+    - dónde encuentro el material de estudio
+    - dónde están los apuntes de [matemática](materia)
+    - hay una plataforma con el material de las materias
+    - dónde consigo los apuntes de clase
+    - dónde puedo bajar el material de [informática](materia)
+    - hay resúmenes de las materias en algún lado
+
+- intent: preguntar_como_organizar_tiempo
+  examples: |
+    - cómo organizo mi tiempo de estudio
+    - cómo armo un cronograma de estudio
+    - cómo organizo las entregas y exámenes
+    - tips para organizarme con las tareas
+    - cómo hago un horario de estudio
+    - cómo me organizo si tengo varios exámenes juntos

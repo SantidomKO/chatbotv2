@@ -1,0 +1,180 @@
+version: "3.1"
+
+rules:
+
+# Comunes
+- rule: Responder saludo
+  steps:
+    - intent: saludo
+    - action: utter_saludo
+
+- rule: Responder despedida
+  steps:
+    - intent: despedida
+    - action: utter_despedida
+
+- rule: Responder agradecimiento
+  steps:
+    - intent: agradecer
+    - action: utter_de_nada
+
+- rule: Consulta fuera de alcance
+  steps:
+    - intent: fuera_de_alcance
+    - action: utter_fuera_de_alcance
+
+- rule: Trato irrespetuoso
+  steps:
+    - intent: trato_irrespetuoso
+    - action: utter_trato_irrespetuoso
+
+- rule: Fallback cuando el bot no está seguro
+  steps:
+    - intent: nlu_fallback
+    - action: action_ollama_fallback
+
+# Matemática
+- rule: Definición matemática
+  steps:
+    - intent: preguntar_definicion_matematica
+    - action: utter_explicar_algebra
+
+- rule: Procedimiento matemático
+  steps:
+    - intent: preguntar_procedimiento_matematica
+    - action: utter_explicar_ecuaciones
+
+- rule: Pide ejemplo
+  steps:
+    - intent: pedir_ejemplo
+    - action: utter_pedir_mas_detalle
+
+# Problemas técnicos / Informática
+- rule: Sin internet
+  steps:
+    - intent: problema_sin_internet
+    - action: utter_problema_sin_internet
+
+- rule: PC no enciende
+  steps:
+    - intent: problema_pc_no_enciende
+    - action: utter_problema_pc_no_enciende
+
+- rule: PC lenta
+  steps:
+    - intent: problema_pc_lenta
+    - action: utter_problema_pc_lenta
+
+- rule: Pantalla azul
+  steps:
+    - intent: problema_pantalla_azul
+    - action: utter_problema_pantalla_azul
+
+- rule: Sin sonido
+  steps:
+    - intent: problema_no_hay_sonido
+    - action: utter_problema_no_hay_sonido
+
+- rule: Problema de impresora
+  steps:
+    - intent: problema_impresora
+    - action: utter_problema_impresora
+
+- rule: No reconoce USB
+  steps:
+    - intent: problema_no_reconoce_usb
+    - action: utter_problema_no_reconoce_usb
+
+- rule: Sospecha de virus
+  steps:
+    - intent: problema_sospecha_virus
+    - action: utter_problema_sospecha_virus
+
+- rule: Olvido de contraseña
+  steps:
+    - intent: problema_olvido_password
+    - action: utter_problema_olvido_password
+
+- rule: Programa no abre
+  steps:
+    - intent: problema_no_abre_programa
+    - action: utter_problema_no_abre_programa
+
+# Orientación Vocacional
+- rule: Qué es orientación vocacional
+  steps:
+    - intent: preguntar_que_es_orientacion_vocacional
+    - action: utter_que_es_orientacion_vocacional
+
+- rule: Cómo elegir carrera
+  steps:
+    - intent: preguntar_como_elegir_carrera
+    - action: utter_como_elegir_carrera
+
+- rule: Salidas laborales
+  steps:
+    - intent: preguntar_salidas_laborales
+    - action: utter_salidas_laborales
+
+- rule: Test vocacional
+  steps:
+    - intent: pedir_test_vocacional
+    - action: utter_test_vocacional
+
+# Información escolar
+- rule: Horarios
+  steps:
+    - intent: preguntar_horarios
+    - action: utter_horarios
+
+- rule: Calendario escolar
+  steps:
+    - intent: preguntar_calendario_escolar
+    - action: utter_calendario_escolar
+
+- rule: Inscripción
+  steps:
+    - intent: preguntar_inscripcion
+    - action: utter_inscripcion
+
+- rule: Requisitos y documentación
+  steps:
+    - intent: preguntar_requisitos_documentacion
+    - action: utter_requisitos_documentacion
+
+- rule: Contacto secretaría
+  steps:
+    - intent: preguntar_contacto_secretaria
+    - action: utter_contacto_secretaria
+
+# Instalación y recomendación de software
+- rule: Recomendación de software
+  steps:
+    - intent: pedir_recomendacion_software
+    - action: utter_recomendacion_software
+
+- rule: Cómo instalar software
+  steps:
+    - intent: preguntar_como_instalar_software
+    - action: utter_como_instalar_software
+
+- rule: Software gratuito
+  steps:
+    - intent: preguntar_software_gratuito
+    - action: utter_software_gratuito
+
+# Material y técnica de estudio
+- rule: Técnica de estudio
+  steps:
+    - intent: pedir_tecnica_estudio
+    - action: utter_tecnica_estudio
+
+- rule: Material de estudio
+  steps:
+    - intent: pedir_material_estudio
+    - action: utter_material_estudio
+
+- rule: Organizar tiempo de estudio
+  steps:
+    - intent: preguntar_como_organizar_tiempo
+    - action: utter_como_organizar_tiempo
