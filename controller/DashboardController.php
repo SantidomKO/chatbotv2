@@ -35,10 +35,17 @@ class DashboardController {
      */
     public function conocimiento() {
         // Session is started in index.php bootstrap
-        if (!isset($_SESSION['usuario']['id'])) {
+        if (!isset($_SESSION['usuario_data'])) {
             header('Location: index.php?controller=auth&action=login');
             exit();
         }
+
+        $usuario = Usuario::obtenerPorID($_SESSION['usuario_data']['id']);
+        if (!$usuario || !$usuario->tienePermiso('Gestionar Conocimiento')) {
+            header('Location: index.php?controller=dashboard&action=index');
+            exit();
+        }
+
         $titulo = "Gestión de Conocimiento - Dashboard";
         $categorias = Categoria::listar();
         require_once "view/dashboard/conocimiento.php";

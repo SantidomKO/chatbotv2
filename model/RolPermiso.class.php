@@ -13,7 +13,7 @@ class RolPermiso
 
     public function guardar($idRol, $idPermiso)
     {
-        $sql = "INSERT INTO roles_permisos (id_rol, id_permiso) VALUES (?, ?)";
+        $sql = "INSERT INTO roles_permisos (id_rol, id_permisos) VALUES (?, ?)";
         $stmt = $this->conexion->prepare($sql);
         return $stmt->execute([$idRol, (int)$idPermiso]);
     }
@@ -29,7 +29,7 @@ class RolPermiso
     {
         $sql = "SELECT p.id_permiso, p.nombre, p.descripcion
                 FROM permisos p
-                INNER JOIN roles_permisos rp ON p.id_permiso = rp.id_permiso
+                INNER JOIN roles_permisos rp ON p.id_permiso = rp.id_permisos
                 WHERE rp.id_rol = ?";
         $stmt = $this->conexion->prepare($sql);
         $stmt->execute([$idRol]);
@@ -44,7 +44,7 @@ class RolPermiso
 
     public function obtenerIdsPermisosPorRol($idRol)
     {
-        $sql = "SELECT id_permiso FROM roles_permisos WHERE id_rol = ?";
+        $sql = "SELECT id_permisos FROM roles_permisos WHERE id_rol = ?";
         $stmt = $this->conexion->prepare($sql);
         $stmt->execute([$idRol]);
         return $stmt->fetchAll(PDO::FETCH_COLUMN);

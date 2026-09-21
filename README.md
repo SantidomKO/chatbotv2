@@ -108,3 +108,27 @@ rasa run --enable-api --cors "*" --domain domain/
   entrenados ahí.
 
 EPET N°3 7°I
+
+## Funcionalidad de voz del chatbot
+
+La interfaz del chat incorpora entrada y salida de voz como alternativas accesibles al uso tradicional del teclado. La respuesta escrita siempre permanece visible y el envío de consultas continúa utilizando el formulario existente.
+
+### Tecnologías utilizadas
+
+- **Reconocimiento de voz a texto:** `SpeechRecognition`, con `webkitSpeechRecognition` como compatibilidad para navegadores que exponen la API con prefijo. Es una API nativa de la **Web Speech API**: [documentación de MDN sobre SpeechRecognition](https://developer.mozilla.org/en-US/docs/Web/API/SpeechRecognition).
+- **Conversión de texto a voz:** `SpeechSynthesis` y `SpeechSynthesisUtterance`, también parte de la **Web Speech API**: [documentación de MDN sobre SpeechSynthesis](https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesis).
+
+No se utilizó una librería externa. Se eligieron APIs propias del navegador porque la aplicación ya funciona con PHP y JavaScript del lado del cliente, no utiliza un bundler frontend y estas APIs permiten incorporar la mejora sin agregar dependencias ni modificar el contrato del backend. El texto dictado se envía al mismo controlador que una consulta escrita.
+
+### Funcionamiento
+
+- El botón **Micrófono** solicita permiso al navegador al iniciar el reconocimiento. El texto reconocido se coloca en el campo de consulta, donde puede revisarse o corregirse antes de enviarlo con el botón habitual o con Enter.
+- Mientras el reconocimiento está activo, el botón cambia a **Detener micrófono**, queda marcado con `aria-pressed="true"` y se muestra el estado “Escuchando”.
+- Cada respuesta de A.U.R.A conserva un botón circular con el icono de volumen. La lectura comienza al pulsarlo y el mismo botón la detiene mientras está activa; iniciar otra respuesta cancela la lectura anterior.
+- Si el navegador no ofrece reconocimiento de voz o el permiso es rechazado, se informa el motivo y el chat continúa funcionando mediante teclado. Si no existe síntesis de voz, la respuesta escrita sigue disponible.
+
+### Compatibilidad y accesibilidad
+
+El soporte de `SpeechRecognition` no es uniforme entre navegadores y suele estar disponible con mayor frecuencia en Chrome y navegadores basados en Chromium; puede requerir `webkitSpeechRecognition`. Además, el micrófono normalmente necesita permiso explícito y un contexto seguro como HTTPS o `localhost`. `SpeechSynthesis` tiene una disponibilidad más amplia, aunque las voces instaladas dependen del sistema operativo y del navegador.
+
+La funcionalidad degrada de forma progresiva: la ausencia de reconocimiento, un error del servicio o el rechazo del permiso no bloquean el ingreso manual ni el envío tradicional. Los controles tienen texto visible, etiquetas ARIA, estados anunciados mediante `role="status"` y foco de teclado. Esto facilita la interacción a personas con dificultades motoras, cansancio visual o necesidad de usar la voz para introducir texto, sin retirar la alternativa escrita ni ocultar las respuestas a lectores de pantalla.

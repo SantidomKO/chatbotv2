@@ -1,32 +1,36 @@
 <?php
 require_once "model/Intent.class.php";
 require_once "model/Categoria.class.php";
+require_once "model/Usuario.class.php";
 
 class IntentController {
-    public function listar() {
-        if (!isset($_SESSION['usuario']['id'])) {
+    private function requirePermission($permiso) {
+        if (!isset($_SESSION['usuario_data'])) {
             header('Location: index.php?controller=auth&action=login');
             exit();
         }
+        $usuario = Usuario::obtenerPorID($_SESSION['usuario_data']['id']);
+        if (!$usuario || !$usuario->tienePermiso($permiso)) {
+            header('Location: index.php?controller=dashboard&action=index');
+            exit();
+        }
+    }
+
+    public function listar() {
+        $this->requirePermission('Gestionar Intents');
         $intents = Intent::listar();
         $categorias = Categoria::listar();
         require_once "view/intents/index.php";
     }
 
     public function crear() {
-        if (!isset($_SESSION['usuario']['id'])) {
-            header('Location: index.php?controller=auth&action=login');
-            exit();
-        }
+        $this->requirePermission('Gestionar Intents');
         $categorias = Categoria::listar();
         require_once "view/intents/crear.php";
     }
 
     public function editar() {
-        if (!isset($_SESSION['usuario']['id'])) {
-            header('Location: index.php?controller=auth&action=login');
-            exit();
-        }
+        $this->requirePermission('Gestionar Intents');
         $id = $_GET['id'] ?? null;
         if ($id === null) {
             header('Location: index.php?controller=intent&action=listar');
@@ -38,6 +42,7 @@ class IntentController {
     }
 
     public function guardar() {
+        $this->requirePermission('Gestionar Intents');
         $nombreIntent = $_POST['nombre_intent'] ?? '';
         $categoriaId = $_POST['categoria_id'] ?? null;
         $descripcion = $_POST['descripcion'] ?? '';
@@ -55,6 +60,7 @@ class IntentController {
     }
 
     public function actualizar() {
+        $this->requirePermission('Gestionar Intents');
         $id = $_POST['id'] ?? null;
         $nombreIntent = $_POST['nombre_intent'] ?? '';
         $categoriaId = $_POST['categoria_id'] ?? null;
@@ -75,6 +81,7 @@ class IntentController {
     }
 
     public function eliminar() {
+        $this->requirePermission('Gestionar Intents');
         $id = $_GET['id'] ?? null;
         if ($id) {
             $intent = new Intent($id);

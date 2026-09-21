@@ -43,9 +43,10 @@ class Usuario
         }
 
         $hashedPassword = password_hash($this->password, PASSWORD_DEFAULT);
-        $sql="UPDATE usuarios SET `nombre`=?, `email`=?, `password`=? WHERE `id_usuario`=?";
+        $sql="UPDATE usuarios SET `nombre`=?, `email`=?, `password`=?, `id_rol`=? WHERE `id_usuario`=?";
         $stmt=$this->conexion->prepare($sql);
-        return $stmt->execute([$this->nombre, $this->email, $hashedPassword, $this->id]);
+        $rolId = $this->rol ? $this->rol->getId() : null;
+        return $stmt->execute([$this->nombre, $this->email, $hashedPassword, $rolId, $this->id]);
     }
     public function eliminar(){
         //Armamos la consulta SQL
@@ -142,6 +143,18 @@ class Usuario
     public function getPassword() {return $this->password;}
     public function getRolNombre() {
         return $this->rol ? $this->rol->getNombre() : null;
+    }
+
+    public function tienePermiso($nombrePermiso) {
+        if (!$this->rol) return false;
+
+        $conexion = Database::getInstance()->getConnection();
+        $sql = "SELECT COUNT(*) FROM roles_permisos rp
+                JOIN permisos p ON rp.id_permisos = p.id_permiso
+                WHERE rp.id_rol = ? AND p.nombre = ?";
+        $stmt = $conexion->prepare($sql);
+        $stmt->execute([$this->rol->getId(), $nombrePermiso]);
+        return $stmt->fetchColumn() > 0;
     }
 }
 ?>

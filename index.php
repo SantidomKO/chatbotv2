@@ -10,27 +10,12 @@ require_once "controller/RolController.php";
 $controller = $_GET["controller"] ?? 'auth';
 $action = $_GET["action"] ?? 'login';
 
-if (!isset($_SESSION['usuario']) && $controller !== 'auth') {
+if (!isset($_SESSION['usuario_data']) && $controller !== 'auth') {
     header('Location: index.php?controller=auth&action=login');
     exit();
 }
 
 $usuario = $_SESSION['usuario'] ?? null;
-$esAdmin = !empty($usuario['es_admin']);
-
-if (isset($usuario) && !$esAdmin) {
-    $controllerPermitido = ['auth', 'chat'];
-
-    if (!in_array($controller, $controllerPermitido, true)) {
-        header('Location: index.php?controller=chat&action=index');
-        exit();
-    }
-
-    if ($controller === 'auth' && !in_array($action, ['logout', 'login', 'validar'], true)) {
-        header('Location: index.php?controller=chat&action=index');
-        exit();
-    }
-}
 
 switch ($controller) {
     case 'auth':

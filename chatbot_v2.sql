@@ -9,7 +9,7 @@
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
-SET time_zone = "+00:00";
+SET time_zone = "-03:00";
 
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
@@ -231,8 +231,14 @@ CREATE TABLE `permisos` (
 --
 
 INSERT INTO `permisos` (`id_permiso`, `nombre`, `descripcion`) VALUES
-(7, 'Lectura y Escritura', 'Permiso de Leer y Escribir '),
-(8, 'Lectura', 'Ya sea Alumno o Personas sin mayor acceso que al chat');
+(1, 'Lectura y Escritura', 'Permiso de Leer y Escribir'),
+(2, 'Lectura', 'Ya sea Alumno o Personas sin mayor acceso que al chat'),
+(3, 'Gestionar Conocimiento', 'Acceso a gestión de conocimiento del chatbot'),
+(4, 'Gestionar Preguntas Sin Respuesta', 'Acceso a preguntas sin respuesta'),
+(5, 'Gestionar Usuarios', 'Acceso a gestión de usuarios'),
+(6, 'Gestionar Roles', 'Acceso a gestión de roles'),
+(7, 'Gestionar Permisos', 'Acceso a gestión de permisos'),
+(8, 'Gestionar Intents', 'Acceso a gestión de intents');
 
 -- --------------------------------------------------------
 
@@ -286,9 +292,9 @@ CREATE TABLE `roles` (
 -- Volcado de datos para la tabla `roles`
 --
 
-INSERT INTO `roles` (`idRol`, `nombre`, `descripcion`) VALUES
-(9, 'Administrador', 'Acceso total al sistema'),
-(11, 'Usuario', 'Ya sea Alumno o Personas sin mayor acceso que al chat');
+INSERT INTO `roles` (`id_rol`, `nombre`, `descripcion`) VALUES
+(1, 'Administrador', 'Acceso total al sistema'),
+(2, 'Usuario', 'Ya sea Alumno o Personas sin mayor acceso que al chat');
 
 -- --------------------------------------------------------
 
@@ -300,6 +306,20 @@ CREATE TABLE `roles_permisos` (
   `id_rol` int(11) DEFAULT NULL,
   `id_permisos` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `roles_permisos`
+--
+
+INSERT INTO `roles_permisos` (`id_rol`, `id_permisos`) VALUES
+(1, 1),
+(1, 2),
+(1, 3),
+(1, 4),
+(1, 5),
+(1, 6),
+(1, 7),
+(1, 8);
 
 -- --------------------------------------------------------
 
@@ -320,8 +340,8 @@ CREATE TABLE `usuarios` (
 --
 
 INSERT INTO `usuarios` (`id_usuario`, `nombre`, `email`, `password`, `id_rol`) VALUES
-(19, 'Administrador', 'admin@epet3.edu.ar', '$2y$10$GAZbm/tlehVRurWZIgO4cuTyBVllybJ3a5oKIt.aHSc069i2n8I6y', NULL),
-(20, 'User Beta', 'user@epet3.edu.ar', '$2y$10$94xRUXFIkGYazBFQ9U7cIO6VlJG78p.RKDmtXFrtLBU1j7dhWStLG', NULL);
+(2, 'Administrador', 'admin@epet3.edu.ar', '$2y$10$2G.aenOGFPEX2vr204wFluy49yk9X3lZZt6oyVP.sSTDKzzkv2psi', 1),
+(3, 'Usuario Normal', 'user@epet3.edu.ar', '$2y$10$94xRUXFIkGYazBFQ9U7cIO6VlJG78p.RKDmtXFrtLBU1j7dhWStLG', 2);
 
 --
 -- Índices para tablas volcadas

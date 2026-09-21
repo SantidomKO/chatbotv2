@@ -81,7 +81,8 @@ class AuthController
                 || ((int) $usuario->getId() === 1)
                 || (strtolower(trim((string) ($email ?? ''))) === 'admin@epet3.edu.ar');
 
-            $_SESSION['usuario'] = [
+            // Guardar solo datos serializables, no el objeto completo
+            $_SESSION['usuario_data'] = [
                 'id' => $usuario->getId(),
                 'nombre' => $usuario->getNombre(),
                 'email' => $usuario->getEmail(),
