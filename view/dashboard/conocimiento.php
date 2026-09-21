@@ -41,11 +41,9 @@
                 <ul style="list-style: none; padding: 0; margin: 0;" id="categoriasContainer" role="list">
                     <?php if (!empty($categorias)): ?>
                         <?php foreach ($categorias as $cat): ?>
-                            <li style="margin-bottom: 0.5rem; padding: 0.5rem; background: rgba(0, 255, 255, 0.05); border-radius: 8px; border: 1px solid rgba(0, 255, 255, 0.1);" data-category-id="<?php echo htmlspecialchars($cat->getId()); ?>" role="listitem">
+                            <li class="categoria-item" style="margin-bottom: 0.5rem; padding: 0.5rem; background: rgba(0, 255, 255, 0.05); border-radius: 8px; border: 1px solid rgba(0, 255, 255, 0.1); cursor: pointer;" data-category-id="<?php echo htmlspecialchars($cat->getId()); ?>" role="listitem">
                                 <div style="display: flex; justify-content: space-between; align-items: center;">
-                                    <button type="button" class="categoria-link" style="color: #e0e0e0; text-decoration: none; font-weight: 500; background: none; border: none; cursor: pointer; text-align: left; padding: 0; width: 100%;" aria-label="Seleccionar categoría <?php echo htmlspecialchars($cat->getNombre()); ?>">
-                                        <?php echo htmlspecialchars($cat->getNombre()); ?>
-                                    </button>
+                                    <span class="categoria-link" style="color: #e0e0e0; text-decoration: none; font-weight: 500; flex: 1;"><?php echo htmlspecialchars($cat->getNombre()); ?></span>
                                     <div style="display: flex; gap: 0.5rem;">
                                         <button type="button" class="btn btn-edit-categoria" data-category-id="<?php echo htmlspecialchars($cat->getId()); ?>" data-category-name="<?php echo htmlspecialchars($cat->getNombre()); ?>" data-category-description="<?php echo htmlspecialchars($cat->getDescripcion() ?? ''); ?>" aria-label="Editar categoría <?php echo htmlspecialchars($cat->getNombre()); ?>" style="background: none; border: none; color: #00ffff; cursor: pointer; font-size: 1rem;">✎</button>
                                         <button type="button" class="btn btn-delete-categoria" data-category-id="<?php echo htmlspecialchars($cat->getId()); ?>" aria-label="Eliminar categoría <?php echo htmlspecialchars($cat->getNombre()); ?>" style="background: none; border: none; color: #ff3b30; cursor: pointer; font-size: 1rem;">✕</button>

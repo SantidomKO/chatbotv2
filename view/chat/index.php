@@ -9,7 +9,7 @@ require_once __DIR__ . '/../layout/sidebar.php';
         <section class="chatbot">
             <header class="chatbot__header">
                 <div class="chatbot__identity">
-                    <img src="view/layout/img/Logo-AURA.jpg" alt="Logo A.U.R.A" class="chatbot__brand-logo">
+                    <img src="assets/img/logopng.png" alt="Logo A.U.R.A" class="chatbot__brand-logo">
                     <div>
                         <h1 class="chatbot__title">A.U.R.A</h1>
                         <p class="chatbot__status"><span></span> Sistema en línea</p>

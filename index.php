@@ -224,6 +224,60 @@ switch ($controller) {
                 break;
         }
         break;
+    case 'dashboard':
+        require_once "controller/DashboardController.php";
+        $dashboardController = new DashboardController();
+        switch ($action) {
+            case 'index':
+                $dashboardController->index();
+                break;
+            case 'conocimiento':
+                $dashboardController->conocimiento();
+                break;
+            case 'createCategoria':
+                $dashboardController->createCategoria();
+                break;
+            case 'updateCategoria':
+                $dashboardController->updateCategoria();
+                break;
+            case 'deleteCategoria':
+                $dashboardController->deleteCategoria();
+                break;
+            case 'getIntentsByCategory':
+                $dashboardController->getIntentsByCategory();
+                break;
+            case 'getIntentDetail':
+                $dashboardController->getIntentDetail();
+                break;
+            case 'exportDashboardRasa':
+                $dashboardController->exportDashboardRasa();
+                break;
+            case 'createIntent':
+                $dashboardController->createIntent();
+                break;
+            case 'updateIntent':
+                $dashboardController->updateIntent();
+                break;
+            case 'deleteIntent':
+                $dashboardController->deleteIntent();
+                break;
+            case 'addFrase':
+                $dashboardController->addFrase();
+                break;
+            case 'deleteFrase':
+                $dashboardController->deleteFrase();
+                break;
+            case 'updateFrase':
+                $dashboardController->updateFrase();
+                break;
+            case 'addRespuesta':
+                $dashboardController->addRespuesta();
+                break;
+            default:
+                echo "Accion no encontrada";
+                break;
+        }
+        break;
     default:
         require_once "controller/ChatController.php";
         $chatController = new ChatController();

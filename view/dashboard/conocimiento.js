@@ -30,18 +30,17 @@ document.addEventListener('DOMContentLoaded', function() {
         if (e.target.closest('.btn-edit-categoria') || e.target.closest('.btn-delete-categoria')) {
             return; // Dejar que otros manejadores se encarguen
         }
-        
-        const link = e.target.closest('.categoria-link');
-        if (!link) return;
-        
+
+        const item = e.target.closest('.categoria-item');
+        if (!item) return;
+
         e.preventDefault();
         e.stopPropagation();
-        
-        const item = link.closest('li');
+
         const categoryId = item.dataset.categoryId;
-        
+
         console.log('Categoría seleccionada:', categoryId); // Debug
-        
+
         // Highlight selected category
         document.querySelectorAll('#categoriasContainer li').forEach(el => {
             el.style.background = 'rgba(0, 255, 255, 0.05)';
@@ -49,10 +48,10 @@ document.addEventListener('DOMContentLoaded', function() {
         });
         item.style.background = 'rgba(0, 255, 255, 0.15)';
         item.style.border = '1px solid rgba(0, 255, 255, 0.3)';
-        
+
         selectedCategoryId = categoryId;
         selectedIntentId = null;
-        
+
         loadIntents(categoryId);
         clearDetalle();
         btnCreateIntent.style.display = 'inline-block';
@@ -109,16 +108,15 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
-        const link = e.target.closest('.intent-link');
-        if (!link) return;
+        const item = e.target.closest('.intent-item');
+        if (!item) return;
         e.preventDefault();
-        
-        const item = link.closest('.intent-item');
+
         const intentId = item.dataset.intentId;
-        
+
         document.querySelectorAll('.intent-item').forEach(el => el.classList.remove('active'));
         item.classList.add('active');
-        
+
         selectedIntentId = intentId;
         loadIntentPhrases(intentId);
     });
@@ -267,11 +265,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 let html = '<ul class="intent-list" style="list-style: none; padding: 0; margin: 0;">';
                 intents.forEach(intent => {
                     html += `
-                        <li class="intent-item" data-intent-id="${intent.id}" data-intent-nombre="${escapeHtml(intent.nombre_intent)}" data-intent-descripcion="${escapeHtml(intent.descripcion || '')}" style="margin-bottom: 0.5rem; padding: 0.5rem; background: rgba(0, 255, 255, 0.05); border-radius: 8px; border: 1px solid rgba(0, 255, 255, 0.1);">
+                        <li class="intent-item" data-intent-id="${intent.id}" data-intent-nombre="${escapeHtml(intent.nombre_intent)}" data-intent-descripcion="${escapeHtml(intent.descripcion || '')}" style="margin-bottom: 0.5rem; padding: 0.5rem; background: rgba(0, 255, 255, 0.05); border-radius: 8px; border: 1px solid rgba(0, 255, 255, 0.1); cursor: pointer;">
                             <div class="intent-main" style="display: flex; justify-content: space-between; align-items: center;">
-                                <button type="button" class="intent-link" style="color: #e0e0e0; text-decoration: none; font-weight: 500; background: none; border: none; cursor: pointer; text-align: left; padding: 0; width: 100%;">
+                                <span class="intent-link" style="color: #e0e0e0; text-decoration: none; font-weight: 500; flex: 1;">
                                     ${escapeHtml(intent.nombre_intent)}
-                                </button>
+                                </span>
                                 <div class="intent-actions" style="display: flex; gap: 0.5rem;">
                                     <button type="button" class="btn btn-edit-intent" data-intent-id="${intent.id}" aria-label="Editar intent" style="background: none; border: none; color: #00ffff; cursor: pointer; font-size: 1rem;">✎</button>
                                     <button type="button" class="btn btn-delete-intent" data-intent-id="${intent.id}" aria-label="Eliminar intent" style="background: none; border: none; color: #ff3b30; cursor: pointer; font-size: 1rem;">✕</button>

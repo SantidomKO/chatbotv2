@@ -9,7 +9,7 @@ require_once "model/Consulta.class.php";
 
 class DashboardController {
     private function requireAuthJson() {
-        if (!isset($_SESSION['usuario']['id'])) {
+        if (!isset($_SESSION['usuario_data']['id'])) {
             http_response_code(401);
             header('Content-Type: application/json; charset=utf-8');
             echo json_encode(['success' => false, 'error' => 'No autorizado']);
@@ -23,7 +23,7 @@ class DashboardController {
 
     public function index() {
         // Session is started in index.php bootstrap
-        if (!isset($_SESSION['usuario']['id'])) {
+        if (!isset($_SESSION['usuario_data']['id'])) {
             header('Location: index.php?controller=auth&action=login');
             exit();
         }
@@ -80,7 +80,7 @@ class DashboardController {
     public function updateCategoria() {
         // Session is started in index.php bootstrap
 
-        if (!isset($_SESSION['usuario']['id'])) {
+        if (!isset($_SESSION['usuario_data']['id'])) {
             http_response_code(401);
             echo json_encode(['success' => false, 'error' => 'No autorizado']);
             exit();
@@ -120,7 +120,7 @@ class DashboardController {
     public function deleteCategoria() {
         // Session is started in index.php bootstrap
 
-        if (!isset($_SESSION['usuario']['id'])) {
+        if (!isset($_SESSION['usuario_data']['id'])) {
             http_response_code(401);
             echo json_encode(['success' => false, 'error' => 'No autorizado']);
             exit();
@@ -166,7 +166,7 @@ class DashboardController {
     public function getIntentsByCategory() {
         // Session is started in index.php bootstrap
 
-        if (!isset($_SESSION['usuario']['id'])) {
+        if (!isset($_SESSION['usuario_data']['id'])) {
             http_response_code(401);
             echo json_encode(['error' => 'No autorizado']);
             exit();
@@ -183,7 +183,7 @@ class DashboardController {
 
         $intents = Intent::listar();
         $filtered = [];
-        
+
         foreach ($intents as $intent) {
             if ($intent->getCategoria() && $intent->getCategoria()->getId() == $categoryId) {
                 $filtered[] = [
@@ -277,7 +277,7 @@ class DashboardController {
         if (session_status() === PHP_SESSION_NONE) {
             session_start();
         }
-        if (!isset($_SESSION['usuario']['id'])) {
+        if (!isset($_SESSION['usuario_data']['id'])) {
             http_response_code(401);
             echo json_encode(['error' => 'No autorizado']);
             exit();
@@ -312,7 +312,7 @@ class DashboardController {
     public function createIntent() {
         // Session is started in index.php bootstrap
 
-        if (!isset($_SESSION['usuario']['id'])) {
+        if (!isset($_SESSION['usuario_data']['id'])) {
             http_response_code(401);
             echo json_encode(['success' => false, 'error' => 'No autorizado']);
             exit();
@@ -349,7 +349,7 @@ class DashboardController {
     public function updateIntent() {
         // Session is started in index.php bootstrap
 
-        if (!isset($_SESSION['usuario']['id'])) {
+        if (!isset($_SESSION['usuario_data']['id'])) {
             http_response_code(401);
             echo json_encode(['success' => false, 'error' => 'No autorizado']);
             exit();
@@ -389,7 +389,7 @@ class DashboardController {
     public function deleteIntent() {
         // Session is started in index.php bootstrap
 
-        if (!isset($_SESSION['usuario']['id'])) {
+        if (!isset($_SESSION['usuario_data']['id'])) {
             http_response_code(401);
             echo json_encode(['success' => false, 'error' => 'No autorizado']);
             exit();
@@ -440,7 +440,7 @@ class DashboardController {
     public function addFrase() {
         // Session is started in index.php bootstrap
 
-        if (!isset($_SESSION['usuario']['id'])) {
+        if (!isset($_SESSION['usuario_data']['id'])) {
             http_response_code(401);
             echo json_encode(['success' => false, 'error' => 'No autorizado']);
             exit();
@@ -482,7 +482,7 @@ class DashboardController {
     public function deleteFrase() {
         // Session is started in index.php bootstrap
 
-        if (!isset($_SESSION['usuario']['id'])) {
+        if (!isset($_SESSION['usuario_data']['id'])) {
             http_response_code(401);
             echo json_encode(['success' => false, 'error' => 'No autorizado']);
             exit();
@@ -526,7 +526,7 @@ class DashboardController {
             session_start();
         }
 
-        if (!isset($_SESSION['usuario']['id'])) {
+        if (!isset($_SESSION['usuario_data']['id'])) {
             http_response_code(401);
             echo json_encode(['success' => false, 'error' => 'No autorizado']);
             exit();
@@ -569,7 +569,7 @@ class DashboardController {
         
         // Session is started in index.php bootstrap
 
-        if (!isset($_SESSION['usuario']['id'])) {
+        if (!isset($_SESSION['usuario_data']['id'])) {
             http_response_code(401);
             echo json_encode(['success' => false, 'error' => 'No autorizado']);
             exit();
@@ -610,7 +610,7 @@ class DashboardController {
         
         // Session is started in index.php bootstrap
 
-        if (!isset($_SESSION['usuario']['id'])) {
+        if (!isset($_SESSION['usuario_data']['id'])) {
             http_response_code(401);
             echo json_encode(['success' => false, 'error' => 'No autorizado']);
             exit();
@@ -657,7 +657,7 @@ class DashboardController {
         
         // Session is started in index.php bootstrap
 
-        if (!isset($_SESSION['usuario']['id'])) {
+        if (!isset($_SESSION['usuario_data']['id'])) {
             http_response_code(401);
             echo json_encode(['success' => false, 'error' => 'No autorizado']);
             exit();
@@ -702,7 +702,7 @@ class DashboardController {
     public function deleteRespuesta() {
         header('Content-Type: application/json; charset=utf-8');
 
-        if (!isset($_SESSION['usuario']['id'])) {
+        if (!isset($_SESSION['usuario_data']['id'])) {
             http_response_code(401);
             echo json_encode(['success' => false, 'error' => 'No autorizado']);
             exit();
