@@ -73,10 +73,15 @@ require_once __DIR__ . '/../layout/sidebar.php';
             function setVoiceStatus(message, temporary) {
                 if (voiceStatusTimeout) window.clearTimeout(voiceStatusTimeout);
                 voiceStatus.textContent = message;
+                voiceStatus.style.opacity = '1';
+                voiceStatus.style.transition = 'opacity 2s ease-out';
                 if (temporary) {
                     voiceStatusTimeout = window.setTimeout(function () {
-                        voiceStatus.textContent = '';
-                    }, 10000);
+                        voiceStatus.style.opacity = '0';
+                        window.setTimeout(function () {
+                            voiceStatus.textContent = '';
+                        }, 2000);
+                    }, 4000);
                 }
             }
 
@@ -139,9 +144,14 @@ require_once __DIR__ . '/../layout/sidebar.php';
                     utterance.onerror = function () {
                         updateSpeechControls(controls, false);
                         status.textContent = 'No se pudo reproducir';
+                        status.style.opacity = '1';
+                        status.style.transition = 'opacity 2s ease-out';
                         window.setTimeout(function () {
-                            if (status.textContent === 'No se pudo reproducir') status.textContent = '';
-                        }, 10000);
+                            status.style.opacity = '0';
+                            window.setTimeout(function () {
+                                if (status.textContent === 'No se pudo reproducir') status.textContent = '';
+                            }, 2000);
+                        }, 4000);
                         if (activeSpeechToggle === toggleButton) activeSpeechToggle = null;
                     };
 
@@ -158,9 +168,14 @@ require_once __DIR__ . '/../layout/sidebar.php';
                 if (!('speechSynthesis' in window)) {
                     toggleButton.disabled = true;
                     status.textContent = 'Voz no disponible en este navegador';
+                    status.style.opacity = '1';
+                    status.style.transition = 'opacity 2s ease-out';
                     window.setTimeout(function () {
-                        if (status.textContent === 'Voz no disponible en este navegador') status.textContent = '';
-                    }, 10000);
+                        status.style.opacity = '0';
+                        window.setTimeout(function () {
+                            if (status.textContent === 'Voz no disponible en este navegador') status.textContent = '';
+                        }, 2000);
+                    }, 4000);
                 }
             }
 
