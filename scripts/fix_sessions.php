@@ -3,7 +3,6 @@
 $files = [
     __DIR__ . '/../controller/AuthController.php',
     __DIR__ . '/../controller/PreguntaController.php',
-    __DIR__ . '/../controller/DashboardController.php',
 ];
 
 $replacements = [

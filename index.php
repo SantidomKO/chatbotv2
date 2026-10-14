@@ -57,6 +57,51 @@ switch ($controller) {
                 break;
         }
         break;
+    case 'conocimiento':
+        require_once "controller/ConocimientoController.php";
+        $conocimientoController = new ConocimientoController();
+        switch ($action) {
+            case 'index':
+                $conocimientoController->index();
+                break;
+            case 'categorias':
+                $conocimientoController->categorias();
+                break;
+            case 'intents':
+                $conocimientoController->intents();
+                break;
+            case 'detalle':
+                $conocimientoController->detalle();
+                break;
+            case 'guardarCategoria':
+                $conocimientoController->guardarCategoria();
+                break;
+            case 'actualizarCategoria':
+                $conocimientoController->actualizarCategoria();
+                break;
+            case 'eliminarCategoria':
+                $conocimientoController->eliminarCategoria();
+                break;
+            case 'guardarFrase':
+                $conocimientoController->guardarFrase();
+                break;
+            case 'guardarRespuesta':
+                $conocimientoController->guardarRespuesta();
+                break;
+            case 'eliminarFrase':
+                $conocimientoController->eliminarFrase();
+                break;
+            case 'eliminarRespuesta':
+                $conocimientoController->eliminarRespuesta();
+                break;
+            case 'retrain':
+                $conocimientoController->retrain();
+                break;
+            default:
+                echo "Accion no encontrada";
+                break;
+        }
+        break;
     case 'rol':
         $rolController = new RolController();
         switch ($action) {
@@ -218,60 +263,6 @@ switch ($controller) {
         switch ($action) {
             case 'index':
                 $consultasController->index();
-                break;
-            default:
-                echo "Accion no encontrada";
-                break;
-        }
-        break;
-    case 'dashboard':
-        require_once "controller/DashboardController.php";
-        $dashboardController = new DashboardController();
-        switch ($action) {
-            case 'index':
-                $dashboardController->index();
-                break;
-            case 'conocimiento':
-                $dashboardController->conocimiento();
-                break;
-            case 'createCategoria':
-                $dashboardController->createCategoria();
-                break;
-            case 'updateCategoria':
-                $dashboardController->updateCategoria();
-                break;
-            case 'deleteCategoria':
-                $dashboardController->deleteCategoria();
-                break;
-            case 'getIntentsByCategory':
-                $dashboardController->getIntentsByCategory();
-                break;
-            case 'getIntentDetail':
-                $dashboardController->getIntentDetail();
-                break;
-            case 'exportDashboardRasa':
-                $dashboardController->exportDashboardRasa();
-                break;
-            case 'createIntent':
-                $dashboardController->createIntent();
-                break;
-            case 'updateIntent':
-                $dashboardController->updateIntent();
-                break;
-            case 'deleteIntent':
-                $dashboardController->deleteIntent();
-                break;
-            case 'addFrase':
-                $dashboardController->addFrase();
-                break;
-            case 'deleteFrase':
-                $dashboardController->deleteFrase();
-                break;
-            case 'updateFrase':
-                $dashboardController->updateFrase();
-                break;
-            case 'addRespuesta':
-                $dashboardController->addRespuesta();
                 break;
             default:
                 echo "Accion no encontrada";

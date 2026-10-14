@@ -16,7 +16,7 @@ class PreguntaController {
         }
 
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            header('Location: index.php?controller=dashboard&action=index');
+            header('Location: index.php?controller=consultas&action=index');
             exit();
         }
 
@@ -25,14 +25,14 @@ class PreguntaController {
 
         if (!$intent_id || !$texto) {
             $_SESSION['error'] = 'Datos incompletos para guardar la frase de entrenamiento';
-            header('Location: index.php?controller=dashboard&action=index&section=preguntas_sin_respuestas');
+            header('Location: index.php?controller=consultas&action=index');
             exit();
         }
 
         $intent = Intent::obtenerPorID($intent_id);
         if (!$intent) {
             $_SESSION['error'] = 'Intent no encontrado';
-            header('Location: index.php?controller=dashboard&action=index&section=preguntas_sin_respuestas');
+            header('Location: index.php?controller=consultas&action=index');
             exit();
         }
 
@@ -43,7 +43,7 @@ class PreguntaController {
             $_SESSION['error'] = 'Error al guardar la frase de entrenamiento';
         }
 
-        header('Location: index.php?controller=dashboard&action=index&section=preguntas_sin_respuestas');
+        header('Location: index.php?controller=consultas&action=index');
         exit();
     }
 
@@ -60,7 +60,7 @@ class PreguntaController {
         }
 
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            header('Location: index.php?controller=dashboard&action=index');
+            header('Location: index.php?controller=consultas&action=index');
             exit();
         }
 
@@ -70,21 +70,21 @@ class PreguntaController {
 
         if (!$id || !$intent_id || !$texto) {
             $_SESSION['error'] = 'Datos incompletos para actualizar la frase de entrenamiento';
-            header('Location: index.php?controller=dashboard&action=index&section=preguntas_sin_respuestas');
+            header('Location: index.php?controller=consultas&action=index');
             exit();
         }
 
         $frase = FraseEntrenamiento::obtenerPorID($id);
         if (!$frase) {
             $_SESSION['error'] = 'Frase de entrenamiento no encontrada';
-            header('Location: index.php?controller=dashboard&action=index&section=preguntas_sin_respuestas');
+            header('Location: index.php?controller=consultas&action=index');
             exit();
         }
 
         $intent = Intent::obtenerPorID($intent_id);
         if (!$intent) {
             $_SESSION['error'] = 'Intent no encontrado';
-            header('Location: index.php?controller=dashboard&action=index&section=preguntas_sin_respuestas');
+            header('Location: index.php?controller=consultas&action=index');
             exit();
         }
 
@@ -97,7 +97,7 @@ class PreguntaController {
             $_SESSION['error'] = 'Error al actualizar la frase de entrenamiento';
         }
 
-        header('Location: index.php?controller=dashboard&action=index&section=preguntas_sin_respuestas');
+        header('Location: index.php?controller=consultas&action=index');
         exit();
     }
 
@@ -117,14 +117,14 @@ class PreguntaController {
 
         if (!$id) {
             $_SESSION['error'] = 'ID de frase no proporcionado';
-            header('Location: index.php?controller=dashboard&action=index&section=preguntas_sin_respuestas');
+            header('Location: index.php?controller=consultas&action=index');
             exit();
         }
 
         $frase = FraseEntrenamiento::obtenerPorID($id);
         if (!$frase) {
             $_SESSION['error'] = 'Frase de entrenamiento no encontrada';
-            header('Location: index.php?controller=dashboard&action=index&section=preguntas_sin_respuestas');
+            header('Location: index.php?controller=consultas&action=index');
             exit();
         }
 
@@ -134,7 +134,7 @@ class PreguntaController {
             $_SESSION['error'] = 'Error al eliminar la frase de entrenamiento';
         }
 
-        header('Location: index.php?controller=dashboard&action=index&section=preguntas_sin_respuestas');
+            header('Location: index.php?controller=consultas&action=index');
         exit();
     }
 }

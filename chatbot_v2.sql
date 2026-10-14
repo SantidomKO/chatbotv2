@@ -283,7 +283,7 @@ INSERT INTO `respuestas` (`id_respuesta`, `intent_id`, `texto_respuesta`, `activ
 --
 
 CREATE TABLE `roles` (
-  `idRol` int(11) NOT NULL,
+  `id_rol` int(11) NOT NULL,
   `nombre` varchar(100) DEFAULT NULL,
   `descripcion` varchar(100) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -400,7 +400,7 @@ ALTER TABLE `respuestas`
 -- Indices de la tabla `roles`
 --
 ALTER TABLE `roles`
-  ADD PRIMARY KEY (`idRol`);
+  ADD PRIMARY KEY (`id_rol`);
 
 --
 -- Indices de la tabla `roles_permisos`
@@ -466,7 +466,7 @@ ALTER TABLE `respuestas`
 -- AUTO_INCREMENT de la tabla `roles`
 --
 ALTER TABLE `roles`
-  MODIFY `idRol` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `id_rol` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
 -- AUTO_INCREMENT de la tabla `usuarios`
@@ -513,14 +513,14 @@ ALTER TABLE `respuestas`
 -- Filtros para la tabla `roles_permisos`
 --
 ALTER TABLE `roles_permisos`
-  ADD CONSTRAINT `fk_Rol_Permisos_1` FOREIGN KEY (`id_rol`) REFERENCES `roles` (`idRol`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_Rol_Permisos_1` FOREIGN KEY (`id_rol`) REFERENCES `roles` (`id_rol`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `fk_Rol_Permisos_2` FOREIGN KEY (`id_permisos`) REFERENCES `permisos` (`id_permiso`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Filtros para la tabla `usuarios`
 --
 ALTER TABLE `usuarios`
-  ADD CONSTRAINT `fk_Usuario_1` FOREIGN KEY (`id_rol`) REFERENCES `roles` (`idRol`) ON DELETE CASCADE ON UPDATE CASCADE;
+  ADD CONSTRAINT `fk_Usuario_1` FOREIGN KEY (`id_rol`) REFERENCES `roles` (`id_rol`) ON DELETE CASCADE ON UPDATE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

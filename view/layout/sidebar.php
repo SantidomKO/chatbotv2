@@ -45,7 +45,7 @@ $tienePermisosAdmin = $puedeVerConocimiento || $puedeVerPreguntas || $puedeVerUs
             </div>
             <ul>
                 <?php if ($puedeVerConocimiento): ?>
-                <li><a href="index.php?controller=dashboard&action=conocimiento"><img src="<?php echo BASE_URL; ?>assets/icons/database.svg" alt="" aria-hidden="true" class="sidebar-icon"> <span>Gestión de Conocimiento</span></a></li>
+                <li><a href="index.php?controller=conocimiento&action=index"><img src="<?php echo BASE_URL; ?>assets/icons/database.svg" alt="" aria-hidden="true" class="sidebar-icon"> <span>Gestión de Conocimiento</span></a></li>
                 <?php endif; ?>
                 <?php if ($puedeVerPreguntas): ?>
                 <li><a href="index.php?controller=consultas&action=index"><img src="<?php echo BASE_URL; ?>assets/icons/file-question-alt.svg" alt="" aria-hidden="true" class="sidebar-icon"> <span>Preguntas sin Respuesta</span></a></li>

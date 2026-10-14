@@ -10,7 +10,7 @@ class UsuarioController{
         }
         $usuario = Usuario::obtenerPorID($_SESSION['usuario_data']['id']);
         if (!$usuario || !$usuario->tienePermiso($permiso)) {
-            header('Location: index.php?controller=dashboard&action=index');
+            header('Location: index.php?controller=chat&action=index');
             exit();
         }
     }
@@ -43,9 +43,9 @@ class UsuarioController{
         $nombre=$_POST["nombre"];
         $email=$_POST["email"];
         $password=$_POST["password"];
-        $idRol = $_POST["id_rol"] ?? null;
+        $id_rol = $_POST["id_rol"] ?? null;
 
-        $rol = $idRol ? Rol::obtenerPorID($idRol) : null;
+        $rol = $id_rol ? Rol::obtenerPorID($id_rol) : null;
         $usuario= new Usuario($idUsuario, $nombre, $email, $password, $rol);
         $usuario->actualizar();
 
@@ -64,9 +64,9 @@ class UsuarioController{
         $nombre=$_POST["nombre"];
         $email=$_POST["email"];
         $password=$_POST["password"];
-        $idRol = $_POST["id_rol"] ?? null;
+        $id_rol = $_POST["id_rol"] ?? null;
 
-        $rol = $idRol ? Rol::obtenerPorID($idRol) : null;
+        $rol = $id_rol ? Rol::obtenerPorID($id_rol) : null;
         $usuario= new Usuario(null, $nombre, $email, $password, $rol);
         $usuario->guardar();
 

@@ -14,7 +14,7 @@ class RespuestaController {
 
         $r = new Respuesta(null, $texto, $tipo, $intent);
         $r->guardar();
-        header('Location: index.php?controller=dashboard&action=index&section=respuestas');
+        header('Location: index.php?controller=intent&action=listar');
         exit;
     }
 
@@ -31,7 +31,7 @@ class RespuestaController {
             $r = new Respuesta($id, $texto, $tipo, $intent);
             $r->actualizar();
         }
-        header('Location: index.php?controller=dashboard&action=index&section=respuestas');
+        header('Location: index.php?controller=intent&action=listar');
         exit;
     }
 
@@ -41,7 +41,7 @@ class RespuestaController {
             $r = new Respuesta($id);
             $r->eliminar();
         }
-        header('Location: index.php?controller=dashboard&action=index&section=respuestas');
+        header('Location: index.php?controller=intent&action=listar');
         exit;
     }
 }

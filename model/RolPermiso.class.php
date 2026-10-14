@@ -11,28 +11,28 @@ class RolPermiso
         $this->conexion = Database::getInstance()->getConnection();
     }
 
-    public function guardar($idRol, $idPermiso)
+    public function guardar($id_rol, $idPermiso)
     {
         $sql = "INSERT INTO roles_permisos (id_rol, id_permisos) VALUES (?, ?)";
         $stmt = $this->conexion->prepare($sql);
-        return $stmt->execute([$idRol, (int)$idPermiso]);
+        return $stmt->execute([$id_rol, (int)$idPermiso]);
     }
 
-    public function eliminarPorRol($idRol)
+    public function eliminarPorRol($id_rol)
     {
         $sql = "DELETE FROM roles_permisos WHERE id_rol=?";
         $stmt = $this->conexion->prepare($sql);
-        return $stmt->execute([$idRol]);
+        return $stmt->execute([$id_rol]);
     }
 
-    public function obtenerPermisosPorRol($idRol)
+    public function obtenerPermisosPorRol($id_rol)
     {
         $sql = "SELECT p.id_permiso, p.nombre, p.descripcion
                 FROM permisos p
                 INNER JOIN roles_permisos rp ON p.id_permiso = rp.id_permisos
                 WHERE rp.id_rol = ?";
         $stmt = $this->conexion->prepare($sql);
-        $stmt->execute([$idRol]);
+        $stmt->execute([$id_rol]);
 
         $permisos = [];
         while ($fila = $stmt->fetch(PDO::FETCH_ASSOC)) {
@@ -42,11 +42,11 @@ class RolPermiso
         return $permisos;
     }
 
-    public function obtenerIdsPermisosPorRol($idRol)
+    public function obtenerIdsPermisosPorRol($id_rol)
     {
         $sql = "SELECT id_permisos FROM roles_permisos WHERE id_rol = ?";
         $stmt = $this->conexion->prepare($sql);
-        $stmt->execute([$idRol]);
+        $stmt->execute([$id_rol]);
         return $stmt->fetchAll(PDO::FETCH_COLUMN);
     }
 }

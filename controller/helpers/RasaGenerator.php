@@ -32,7 +32,7 @@ class RasaGenerator {
             $frases = $row['frases'];
             $respuestas = $row['respuestas'];
 
-            $safeName = 'dashboard_' . preg_replace('/[^a-z0-9_]/i', '_', strtolower($intent->getNombreIntent()));
+            $safeName = 'knowledge_' . preg_replace('/[^a-z0-9_]/i', '_', strtolower($intent->getNombreIntent()));
 
             // NLU
             $nlu .= "- intent: {$safeName}\n";
@@ -73,9 +73,9 @@ class RasaGenerator {
         if (!is_dir($dataDir)) mkdir($dataDir, 0755, true);
         if (!is_dir($domainDir)) mkdir($domainDir, 0755, true);
 
-        $nluPath = rtrim($dataDir, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . 'dashboard_nlu.yml';
-        $rulesPath = rtrim($dataDir, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . 'dashboard_rules.yml';
-        $domainPath = rtrim($domainDir, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . 'dashboard.yml';
+        $nluPath = rtrim($dataDir, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . 'generated_nlu.yml';
+        $rulesPath = rtrim($dataDir, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . 'generated_rules.yml';
+        $domainPath = rtrim($domainDir, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . 'generated.yml';
 
         file_put_contents($nluPath, $nlu);
         file_put_contents($rulesPath, $rules);
@@ -204,7 +204,7 @@ class RasaGenerator {
             $combined .= "intents:\n";
             foreach ($items as $row) {
                 $intent = $row['intent'];
-                $safeName = 'dashboard_' . preg_replace('/[^a-z0-9_]/i', '_', strtolower($intent->getNombreIntent()));
+                $safeName = 'knowledge_' . preg_replace('/[^a-z0-9_]/i', '_', strtolower($intent->getNombreIntent()));
                 $combined .= "  - " . $safeName . "\n";
             }
             $combined .= "\n";
@@ -224,7 +224,7 @@ class RasaGenerator {
             foreach ($items as $row) {
                 $intent = $row['intent'];
                 $respuestas = $row['respuestas'];
-                $safeName = 'dashboard_' . preg_replace('/[^a-z0-9_]/i', '_', strtolower($intent->getNombreIntent()));
+                $safeName = 'knowledge_' . preg_replace('/[^a-z0-9_]/i', '_', strtolower($intent->getNombreIntent()));
                 $utterName = 'utter_' . $safeName;
                 $combinedActions[] = $utterName;
 
@@ -251,7 +251,7 @@ class RasaGenerator {
             foreach ($items as $row) {
                 $intent = $row['intent'];
                 $frases = $row['frases'];
-                $safeName = 'dashboard_' . preg_replace('/[^a-z0-9_]/i', '_', strtolower($intent->getNombreIntent()));
+                $safeName = 'knowledge_' . preg_replace('/[^a-z0-9_]/i', '_', strtolower($intent->getNombreIntent()));
                 $combined .= "- intent: " . $safeName . "\n  examples: |\n";
                 if (empty($frases)) {
                     $combined .= "    - " . $intent->getNombreIntent() . "\n";
@@ -269,7 +269,7 @@ class RasaGenerator {
             $combined .= "rules:\n\n";
             foreach ($items as $row) {
                 $intent = $row['intent'];
-                $safeName = 'dashboard_' . preg_replace('/[^a-z0-9_]/i', '_', strtolower($intent->getNombreIntent()));
+                $safeName = 'knowledge_' . preg_replace('/[^a-z0-9_]/i', '_', strtolower($intent->getNombreIntent()));
                 $utterName = 'utter_' . $safeName;
                 $combined .= "- rule: respond_{$safeName}\n  steps:\n  - intent: {$safeName}\n  - action: {$utterName}\n\n";
             }
@@ -280,7 +280,7 @@ class RasaGenerator {
             // Escribir archivo combinado temporal (intentar, pero no crítico)
             $dataDir = $nluPath ? dirname($nluPath) : (dirname(__DIR__, 2) . DIRECTORY_SEPARATOR . 'data');
             if (!is_dir($dataDir)) @mkdir($dataDir, 0755, true);
-            $combinedPath = $dataDir . DIRECTORY_SEPARATOR . 'dashboard_combined.yml';
+            $combinedPath = $dataDir . DIRECTORY_SEPARATOR . 'generated_combined.yml';
             // Intentamos escribir para facilitar debugging local, pero si falla continuamos usando el contenido en memoria
             try {
                 @file_put_contents($combinedPath, $combined);

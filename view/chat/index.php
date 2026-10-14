@@ -9,7 +9,7 @@ require_once __DIR__ . '/../layout/sidebar.php';
         <section class="chatbot">
             <header class="chatbot__header">
                 <div class="chatbot__identity">
-                    <img src="assets/img/logopng.png" alt="Logo A.U.R.A" class="chatbot__brand-logo">
+                    <div id="glitch-logo-container" class="glitch-logo"></div>
                     <div>
                         <h1 class="chatbot__title">A.U.R.A</h1>
                         <p class="chatbot__status"><span></span> Sistema en línea</p>
@@ -69,6 +69,7 @@ require_once __DIR__ . '/../layout/sidebar.php';
             let isListening = false;
             let activeSpeechToggle = null;
             let voiceStatusTimeout = null;
+            const uiSound = new Audio('assets/soundeffects/UISound.mp3');
 
             function setVoiceStatus(message, temporary) {
                 if (voiceStatusTimeout) window.clearTimeout(voiceStatusTimeout);
@@ -262,6 +263,8 @@ require_once __DIR__ . '/../layout/sidebar.php';
                     isListening = false;
                     voiceInputButton.setAttribute('aria-pressed', 'false');
                     voiceInputButton.classList.remove('is-listening');
+                    uiSound.currentTime = 0;
+                    uiSound.play().catch(function () {});
                     if (voiceStatus.textContent === 'Escuchando... habla ahora.') {
                         setVoiceStatus('Dictado finalizado. Revisa el texto y envíalo.');
                     }
@@ -316,6 +319,9 @@ require_once __DIR__ . '/../layout/sidebar.php';
             });
         });
     </script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="assets/js/cubo-glitch.js"></script>
 
 <?php
 

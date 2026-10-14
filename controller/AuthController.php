@@ -97,11 +97,7 @@ class AuthController
                 'rol' => $rolNombre ?: 'Usuario',
             ];
 
-            if ($esAdmin) {
-                header('Location: index.php?controller=dashboard&action=index');
-            } else {
-                header('Location: index.php?controller=chat&action=index');
-            }
+            header('Location: index.php?controller=chat&action=index');
             exit();
         } else {
             $_SESSION['error'] = 'Email o contraseña incorrectos';

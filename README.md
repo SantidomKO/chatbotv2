@@ -1,6 +1,6 @@
 # Chatbot (chatbotv2) — guía rápida y estructura
 
-Este repositorio contiene la parte web (PHP) que gestiona un dashboard para
+Este repositorio contiene la parte web (PHP) que gestiona el conocimiento del chatbot para
 editar intents/respuestas y sincronizarlos con Rasa, además de helpers para
 generar el YAML de entrenamiento y disparar el reentrenado y la recarga del
 modelo en Rasa.
@@ -16,15 +16,15 @@ en un directorio local y hace un `PUT /model` para recargarlo en caliente.
 chatbotv2/
 ├── actions/                 # (python) server de actions (si aplica)
 ├── assets/                  # css, js públicos
-├── controller/              # controladores PHP (DashboardController, ChatController...)
+├── controller/              # controladores PHP (ChatController y administración...)
 │   └── helpers/
 │       └── RasaGenerator.php # genera YAML desde DB y llama a Rasa
 ├── data/                    # archivos YAML generados / estáticos (nlu, rules, stories)
-├── domain/                  # domain/base.yml + dashboard.yml generados
+├── domain/                  # domain/base.yml + generated.yml generados
 ├── model/                   # clases PHP de modelo (Intent, Respuesta, Usuario...)
 ├── models/                  # modelos Rasa (.tar.gz) resultantes tras training
 ├── scripts/                 # utilidades (run_train.php, fix_sessions.php, etc.)
-├── view/                    # vistas PHP (dashboard, chat, partials)
+├── view/                    # vistas PHP (chat, administración y partials)
 ├── config.yml               # pipeline + policies (Rasa)
 ├── endpoints.yml            # endpoints de Rasa (action server)
 ├── index.php                # bootstrap/front controller PHP
@@ -33,16 +33,16 @@ chatbotv2/
 ```
 
 Notas importantes:
-- El dominio está dividido en `domain/` para que el dashboard pueda regenerar
-  su parte (`dashboard.yml`) sin sobrescribir lo definido a mano en `base.yml`.
+- El dominio está dividido en `domain/` para que el generador pueda regenerar
+  su parte (`generated.yml`) sin sobrescribir lo definido a mano en `base.yml`.
 - El archivo `config.yml` contiene la configuración de `pipeline` y
-  `policies` usada para entrenar; el código del dashboard puede (y debe
+  `policies` usada para entrenar; el generador puede (y debe
   en el futuro) leerlo dinámicamente.
 
-## Flujo de reentrenado desde el Dashboard (server-side)
+## Flujo de reentrenado (server-side)
 
-- El endpoint PHP `index.php?controller=dashboard&action=retrain` llama a
-  `controller/helpers/RasaGenerator.php::trainAndLoadModel()`.
+- `controller/helpers/RasaGenerator.php::trainAndLoadModel()` genera los archivos
+  y solicita el reentrenamiento a Rasa.
 - `RasaGenerator` genera en memoria un YAML combinado y lo POSTea a
   `http://localhost:5005/model/train` con `Content-Type: text/yaml`.
 - Si Rasa devuelve JSON con la ruta del modelo, se hace `PUT /model` con
@@ -54,11 +54,11 @@ Comando rápido para probar desde la línea de comandos (en la máquina donde
 está corriendo Apache/PHP):
 
 ```bash
-curl -i -X POST "http://localhost/chatbotv2/index.php?controller=dashboard&action=retrain"
+php scripts/run_train.php
 ```
 
-El frontend (`view/dashboard/conocimiento.js`) ha sido endurecido para manejar
-respuestas vacías/no-JSON y mostrará mensajes de error útiles si algo falla.
+El script de entrenamiento devuelve objetos JSON con la fase y el error cuando
+algo falla.
 
 ## Cómo levantar Rasa / acciones (resumen)
 

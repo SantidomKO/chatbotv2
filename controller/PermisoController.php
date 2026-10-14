@@ -10,7 +10,7 @@ class PermisoController{
         }
         $usuario = Usuario::obtenerPorID($_SESSION['usuario_data']['id']);
         if (!$usuario || !$usuario->tienePermiso($permiso)) {
-            header('Location: index.php?controller=dashboard&action=index');
+            header('Location: index.php?controller=chat&action=index');
             exit();
         }
     }

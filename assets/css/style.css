@@ -100,6 +100,14 @@ body {
     forced-color-adjust: none;
 }
 
+/* Glitch Logo Container */
+.glitch-logo {
+    width: 10vh;
+    height: 10vh;
+    display: block;
+    margn: 0;
+}
+
 /* Subtle noise overlay for glitchy texture (no movement) */
 body::before {
     content: "";
