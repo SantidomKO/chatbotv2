@@ -109,6 +109,10 @@ rasa run --enable-api --cors "*" --domain domain/
 
 EPET N°3 7°I
 
+## Verificación en dos pasos
+
+La aplicación permite proteger cuentas con códigos TOTP de Google Authenticator y aplicaciones compatibles. La guía de [instalación, archivos involucrados y flujo completo](docs/authenticator-2fa.md) explica también cómo actualizar una base existente. El esquema para nuevas instalaciones está en `chatbot_v2.sql`.
+
 ## Funcionalidad de voz del chatbot
 
 La interfaz del chat incorpora entrada y salida de voz como alternativas accesibles al uso tradicional del teclado. La respuesta escrita siempre permanece visible y el envío de consultas continúa utilizando el formulario existente.

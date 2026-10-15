@@ -3,6 +3,10 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
+if (empty($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
+
 define('BASE_URL', 'http://' . $_SERVER['HTTP_HOST'] . '/chatbotv2/');
 
 require_once "controller/RolController.php";
@@ -27,6 +31,12 @@ switch ($controller) {
                 break;
             case 'validar':
                 $authController->validar();
+                break;
+            case 'verificarSegundoFactor':
+                $authController->verificarSegundoFactor();
+                break;
+            case 'cancelarSegundoFactor':
+                $authController->cancelarSegundoFactor();
                 break;
             case 'registrar':
                 $authController->registrar();
@@ -251,6 +261,15 @@ switch ($controller) {
         switch ($action) {
             case 'ver':
                 $perfilController->ver();
+                break;
+            case 'iniciarConfiguracion2FA':
+                $perfilController->iniciarConfiguracion2FA();
+                break;
+            case 'activar2FA':
+                $perfilController->activar2FA();
+                break;
+            case 'desactivar2FA':
+                $perfilController->desactivar2FA();
                 break;
             default:
                 echo "Accion no encontrada";

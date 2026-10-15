@@ -6,7 +6,7 @@
     <div class="auth-card">
         <div class="auth-header">
             <h1>Chatbot</h1>
-            <p>Inicia sesión para continuar</p>
+            <p><?= isset($_SESSION['pending_2fa']) ? 'Verifica tu identidad' : 'Inicia sesión para continuar' ?></p>
         </div>
         <?php if (isset($_SESSION['error'])): ?>
             <div class="form-error">
@@ -20,22 +20,40 @@
             </div>
             <?php unset($_SESSION['success']); ?>
         <?php endif; ?>
-        <form action="index.php?controller=auth&action=validar" method="POST" class="auth-form">
-            <div class="form-group">
-                <label>Email</label>
-                <input type="email" name="email" required>
+        <?php if (isset($_SESSION['pending_2fa'])): ?>
+            <form action="index.php?controller=auth&action=verificarSegundoFactor" method="POST" class="auth-form">
+                <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token']) ?>">
+                <div class="form-group">
+                    <label for="authenticator-code">Código de la aplicación</label>
+                    <input id="authenticator-code" type="text" name="code" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9 ]{6,8}" maxlength="8" required autofocus>
+                </div>
+                <div class="form-actions auth-actions">
+                    <button type="submit" class="btn btn-primary">Verificar código</button>
+                </div>
+            </form>
+            <form action="index.php?controller=auth&action=cancelarSegundoFactor" method="POST" class="auth-links">
+                <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token']) ?>">
+                <button type="submit" class="btn btn-secondary">Cancelar e iniciar de nuevo</button>
+            </form>
+        <?php else: ?>
+            <form action="index.php?controller=auth&action=validar" method="POST" class="auth-form">
+                <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token']) ?>">
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label>Contraseña</label>
+                    <input type="password" name="password" required>
+                </div>
+                <div class="form-actions auth-actions">
+                    <button type="submit" class="btn btn-primary">Iniciar Sesión</button>
+                </div>
+            </form>
+            <div class="auth-links">
+                <a href="index.php?controller=auth&action=registrar">¿No tienes cuenta? Regístrate</a>
             </div>
-            <div class="form-group">
-                <label>Contraseña</label>
-                <input type="password" name="password" required>
-            </div>
-            <div class="form-actions auth-actions">
-                <button type="submit" class="btn btn-primary">Iniciar Sesión</button>
-            </div>
-        </form>
-        <div class="auth-links">
-            <a href="index.php?controller=auth&action=registrar">¿No tienes cuenta? Regístrate</a>
-        </div>
+        <?php endif; ?>
     </div>
 </div>
 <?php require_once __DIR__ . '/../layout/footer.php'; ?>
