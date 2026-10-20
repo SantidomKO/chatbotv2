@@ -10,7 +10,7 @@ La aplicación admite códigos TOTP de seis dígitos generados por Google Authen
    ```powershell
    C:\xampp\php\php.exe -r "echo base64_encode(random_bytes(32)), PHP_EOL;"
    ```
-
+IW+ySLvU+mfROL9PHmTCNuA4tlqzOUZLwMnTiyvwFCQ=
 3. Configura el resultado en la configuración de Apache, por ejemplo en `C:\xampp\apache\conf\extra\httpd-xampp.conf`:
 
    ```apache
