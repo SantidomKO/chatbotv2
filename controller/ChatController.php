@@ -1,5 +1,7 @@
 <?php
 
+require_once __DIR__ . '/../app_config.php';
+
 class ChatController
 {
     public function index()
@@ -31,7 +33,8 @@ class ChatController
                 $message = mb_substr($message, 0, 2000);
             }
             // Primero obtener el parse (intent + confidence) usando /model/parse
-            $parse_url = 'http://localhost:5005/model/parse';
+            $rasaUrl = rtrim(app_config('RASA_URL', 'http://localhost:5005'), '/');
+            $parse_url = $rasaUrl . '/model/parse';
             $parsePayload = json_encode(['text' => $message]);
             $chParse = curl_init($parse_url);
             curl_setopt($chParse, CURLOPT_POST, true);
@@ -43,7 +46,7 @@ class ChatController
             curl_close($chParse);
 
             // Luego llamar al webhook para obtener la(s) respuesta(s) del bot
-            $rasa_webhook_url = 'http://localhost:5005/webhooks/rest/webhook';
+            $rasa_webhook_url = $rasaUrl . '/webhooks/rest/webhook';
             $payload = json_encode([
                 'sender' => 'test_user',
                 'message' => $message,

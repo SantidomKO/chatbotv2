@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/../../app_config.php';
 require_once __DIR__ . '/../../model/Intent.class.php';
 
 class RasaGenerator {
@@ -101,7 +102,8 @@ class RasaGenerator {
         ];
     }
 
-    public static function trainAndLoadModel() {
+    public static function trainAndLoadModel($rasaUrl = null) {
+        $rasaUrl = rtrim($rasaUrl ?: app_config('RASA_URL', 'http://localhost:5005'), '/');
         // Wrap operations to convert warnings into exceptions and return structured errors
         set_error_handler(function($errno, $errstr, $errfile, $errline) {
             throw new ErrorException($errstr, 0, $errno, $errfile, $errline);
@@ -289,7 +291,7 @@ class RasaGenerator {
             }
 
             // Enviar como body crudo (text/yaml)
-            $trainUrl = 'http://localhost:5005/model/train';
+            $trainUrl = $rasaUrl . '/model/train';
             $ch = curl_init();
             curl_setopt($ch, CURLOPT_URL, $trainUrl);
             curl_setopt($ch, CURLOPT_POST, true);
@@ -370,7 +372,7 @@ class RasaGenerator {
         }
 
         // Hacer PUT a /model para recargar en caliente
-        $putUrl = 'http://localhost:5005/model';
+        $putUrl = $rasaUrl . '/model';
         // Rasa expects the model_file path as returned by the training endpoint; avoid prefixing to prevent malformed path
         $payload = ['model_file' => $modelFile];
 

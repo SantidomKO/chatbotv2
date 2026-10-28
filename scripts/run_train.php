@@ -6,9 +6,6 @@ require_once __DIR__ . '/../controller/helpers/RasaGenerator.php';
 
 header_remove();
 
-$projectPath = dirname(__DIR__);
-$rasaUrl = 'http://localhost:5005';
-
-$result = RasaGenerator::trainAndLoadModel($rasaUrl, $projectPath);
+$result = RasaGenerator::trainAndLoadModel();
 
 echo json_encode($result, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);

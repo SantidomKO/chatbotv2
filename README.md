@@ -32,6 +32,45 @@ chatbotv2/
 └── requirements.txt         # (python) dependencias para scripts de sync/train
 ```
 
+## Configuración para mover el proyecto
+
+La configuración de conexiones está centralizada en `.env`. Copiá `.env.example`
+a `.env` y editá ese archivo para cada instalación:
+
+```bash
+cp .env.example .env
+```
+
+En Windows también podés copiarlo desde el Explorador de archivos. `.env` está
+ignorado por Git para que las contraseñas no se suban al repositorio. La
+aplicación PHP lo carga automáticamente; las variables que ya defina el entorno
+(por ejemplo, Docker Compose) tienen prioridad.
+
+Configurá `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER` y `DB_PASSWORD` con los datos
+de la base de datos de esa variante. Si PHP y MySQL están en contenedores de la
+misma red de Docker, `DB_HOST` debe ser el nombre del servicio/contenedor MySQL,
+no `localhost`. Importá `chatbot_v2.sql` en esa base. Cada variante puede tener
+su propio `.env` con base y usuario de base de datos diferentes.
+
+`RASA_URL` es la URL base que usa PHP para conversar y solicitar entrenamiento.
+Desde un contenedor, usá el nombre del servicio Rasa accesible en la red Docker.
+Si cada variante requiere un modelo diferente, apuntá cada una a su propia
+instancia Rasa: una instancia compartida tiene un único modelo activo y el
+entrenamiento de una variante puede reemplazar el modelo de las demás.
+
+`OLLAMA_URL` y `OLLAMA_MODEL` configuran la conexión de las acciones
+personalizadas. El contenedor del servidor de acciones también debe recibir
+estas variables de entorno. Para que Rasa alcance ese servidor dentro de
+Docker, cambiá `action_endpoint.url` en `endpoints.yml` a la dirección de red
+del servicio de acciones (por ejemplo,
+`http://action-server:5055/webhook`). `localhost` dentro de un contenedor solo
+se refiere a ese mismo contenedor.
+
+Al usar Docker Compose, el servicio PHP puede cargar `.env` con `env_file: .env`;
+configurá de forma equivalente las variables que necesite cada otro servicio.
+No publiques los puertos de MySQL o Rasa a Internet. Para probar la conexión
+PHP/MySQL, ejecutá `php test_db.php` desde el entorno donde corre PHP.
+
 Notas importantes:
 - El dominio está dividido en `domain/` para que el generador pueda regenerar
   su parte (`generated.yml`) sin sobrescribir lo definido a mano en `base.yml`.
@@ -44,7 +83,7 @@ Notas importantes:
 - `controller/helpers/RasaGenerator.php::trainAndLoadModel()` genera los archivos
   y solicita el reentrenamiento a Rasa.
 - `RasaGenerator` genera en memoria un YAML combinado y lo POSTea a
-  `http://localhost:5005/model/train` con `Content-Type: text/yaml`.
+  `${RASA_URL}/model/train` con `Content-Type: text/yaml`.
 - Si Rasa devuelve JSON con la ruta del modelo, se hace `PUT /model` con
   `{"model_file": "<ruta>"}`. Si devuelve el `.tar.gz` binario, el
   generador lo guarda localmente (en `models/` o en `/tmp`) y hace `PUT` con

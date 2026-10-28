@@ -27,6 +27,7 @@
 #         return []
 
 import requests
+import os
 from typing import Any, Text, Dict, List
 from rasa_sdk import Action, Tracker
 from rasa_sdk.executor import CollectingDispatcher
@@ -42,10 +43,10 @@ class ActionOllamaFallback(Action):
         user_message = tracker.latest_message.get('text')
         
         # Endpoint por defecto de Ollama
-        ollama_url = "http://172.23.0.159:11434/api/chat"
+        ollama_url = os.getenv("OLLAMA_URL", "http://localhost:11434/api/chat")
         
         payload = {
-            "model": "gemma3:1b",  # Cambia por el modelo que tengas descargado en Ollama
+            "model": os.getenv("OLLAMA_MODEL", "gemma3:1b"),
             "messages": [
                 {
                     "role": "system",
