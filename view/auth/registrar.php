@@ -31,6 +31,14 @@
                 <label>Confirmar Contraseña</label>
                 <input type="password" name="confirm_password" required minlength="4">
             </div>
+            <div class="form-group">
+                <label>Verificación en dos pasos (opcional)</label>
+                <select name="two_factor_method">
+                    <option value="none">No activar</option>
+                    <option value="authenticator">Autenticador (Google/Microsoft/Authy)</option>
+                    <option value="email">Código por email</option>
+                </select>
+            </div>
             <div class="form-actions auth-actions">
                 <button type="submit" class="btn btn-primary">Registrarse</button>
             </div>

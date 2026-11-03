@@ -24,6 +24,7 @@ class AuthController
         $email = trim($_POST['email'] ?? '');
         $password = trim($_POST['password'] ?? '');
         $confirmPassword = trim($_POST['confirm_password'] ?? '');
+        $twoFactorMethod = Usuario::normalizarMetodo2FA($_POST['two_factor_method'] ?? 'none');
 
         if ($nombre === '' || $email === '' || $password === '') {
             $_SESSION['error'] = 'Todos los campos son obligatorios';
@@ -37,7 +38,6 @@ class AuthController
             return;
         }
 
-        // Verificar si el email ya existe
         $emailExistente = Usuario::obtenerPorEmail($email);
         if ($emailExistente) {
             $_SESSION['error'] = 'El email ya está registrado';
@@ -45,9 +45,14 @@ class AuthController
             return;
         }
 
-        // Crear nuevo usuario (sin rol por defecto)
-        $usuario = new Usuario(null, $nombre, $email, $password, null);
-        if ($usuario->guardar()) {
+        $rolNormal = Rol::obtenerPorID(2);
+        $usuario = new Usuario(null, $nombre, $email, $password, $rolNormal);
+        $usuarioId = $usuario->guardar();
+        if ($usuarioId) {
+            $usuario->setId((int) $usuarioId);
+            if ($twoFactorMethod !== 'none') {
+                $usuario->guardarMetodo2FA($twoFactorMethod);
+            }
             $_SESSION['success'] = 'Usuario registrado exitosamente. Por favor inicia sesión.';
             header('Location: index.php?controller=auth&action=login');
             exit();
@@ -84,15 +89,44 @@ class AuthController
         $usuario = Usuario::verificarLogin($email, $password);
 
         if ($usuario) {
-            $authenticator = new Authenticator();
-            if ($authenticator->isEnabled($usuario->getId())) {
-                session_regenerate_id(true);
-                $_SESSION['pending_2fa'] = [
-                    'user_id' => $usuario->getId(),
-                    'expires_at' => time() + 300,
-                ];
-                header('Location: index.php?controller=auth&action=login');
-                exit();
+            $method = $this->resolverMetodo2FA($usuario);
+            if ($method !== 'none') {
+                if ($method === 'authenticator') {
+                    $authenticator = new Authenticator();
+                    if (!$authenticator->isEnabled($usuario->getId())) {
+                        $method = 'email';
+                    }
+                }
+
+                if ($method === 'authenticator') {
+                    session_regenerate_id(true);
+                    $_SESSION['pending_2fa'] = [
+                        'user_id' => $usuario->getId(),
+                        'method' => 'authenticator',
+                        'expires_at' => time() + 300,
+                    ];
+                    header('Location: index.php?controller=auth&action=login');
+                    exit();
+                }
+
+                if ($method === 'email') {
+                    $code = (string) random_int(100000, 999999);
+                    session_regenerate_id(true);
+                    $mailSent = $this->enviarCodigoPorMail($usuario->getEmail(), $code);
+                    $_SESSION['pending_2fa'] = [
+                        'user_id' => $usuario->getId(),
+                        'method' => 'email',
+                        'code' => $code,
+                        'mail_sent' => $mailSent,
+                        'debug_code' => $code,
+                        'expires_at' => time() + 300,
+                    ];
+                    if (!$mailSent) {
+                        $_SESSION['error'] = 'No se pudo enviar el correo desde este entorno. Como es una instalación local sin SMTP configurado, se muestra el código de prueba para continuar.';
+                    }
+                    header('Location: index.php?controller=auth&action=login');
+                    exit();
+                }
             }
 
             $this->completeLogin($usuario);
@@ -119,11 +153,20 @@ class AuthController
             exit();
         }
 
-        $authenticator = new Authenticator();
-        if (!$authenticator->verifyAndConsume((int) $pending['user_id'], $_POST['code'] ?? '')) {
-            $_SESSION['error'] = 'El código no es válido o ya fue utilizado.';
-            header('Location: index.php?controller=auth&action=login');
-            exit();
+        if (($pending['method'] ?? 'authenticator') === 'email') {
+            $codigoIngresado = preg_replace('/\D+/', '', (string) ($_POST['code'] ?? ''));
+            if (!hash_equals((string) $pending['code'], $codigoIngresado)) {
+                $_SESSION['error'] = 'El código enviado por email no es válido o ya expiró.';
+                header('Location: index.php?controller=auth&action=login');
+                exit();
+            }
+        } else {
+            $authenticator = new Authenticator();
+            if (!$authenticator->verifyAndConsume((int) $pending['user_id'], $_POST['code'] ?? '')) {
+                $_SESSION['error'] = 'El código no es válido o ya fue utilizado.';
+                header('Location: index.php?controller=auth&action=login');
+                exit();
+            }
         }
 
         $usuario = Usuario::obtenerPorID((int) $pending['user_id']);
@@ -171,8 +214,55 @@ class AuthController
             'rol' => $rolNombre ?: 'Usuario',
         ];
 
+        $authenticator = new Authenticator();
+        $metodoElegido = Usuario::obtenerMetodo2FA($usuario->getId());
+        if ($metodoElegido === 'authenticator' && !$authenticator->isEnabled($usuario->getId())) {
+            $_SESSION['success'] = 'Todavía no configuraste tu autenticador. Puedes hacerlo desde Mi perfil.';
+            header('Location: index.php?controller=perfil&action=ver');
+            exit();
+        }
+
         header('Location: index.php?controller=chat&action=index');
         exit();
+    }
+
+    private function resolverMetodo2FA($usuario): string
+    {
+        $authenticator = new Authenticator();
+        $metodoUsuario = Usuario::obtenerMetodo2FA($usuario->getId());
+
+        if ($metodoUsuario === 'authenticator' && $authenticator->isEnabled($usuario->getId())) {
+            return 'authenticator';
+        }
+
+        if ($metodoUsuario === 'authenticator' && !$authenticator->isEnabled($usuario->getId())) {
+            return 'email';
+        }
+
+        if ($metodoUsuario === 'email') {
+            return 'email';
+        }
+
+        return 'none';
+    }
+
+    private function enviarCodigoPorMail(string $email, string $codigo): bool
+    {
+        $mensaje = "Tu código de verificación es: {$codigo}\n\nEste código vence en 5 minutos.";
+        $asunto = 'Código de verificación';
+        $headers = [
+            'From: no-reply@chatbotv2.local',
+            'Reply-To: no-reply@chatbotv2.local',
+            'X-Mailer: PHP/' . phpversion(),
+            'Content-Type: text/plain; charset=UTF-8',
+        ];
+
+        $enviado = @mail($email, $asunto, $mensaje, implode("\r\n", $headers));
+        if ($enviado === false) {
+            error_log('Fallo al enviar código 2FA por mail a: ' . $email);
+        }
+
+        return $enviado !== false;
     }
 
     private function validarCsrf()

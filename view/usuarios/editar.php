@@ -35,6 +35,14 @@
                     </select>
                 </div>
                 <div class="form-group">
+                    <label>Verificación en dos pasos</label>
+                    <select name="two_factor_method">
+                        <option value="none" <?= Usuario::obtenerMetodo2FA((int) $usuario->getId()) === 'none' ? 'selected' : '' ?>>No activar</option>
+                        <option value="authenticator" <?= Usuario::obtenerMetodo2FA((int) $usuario->getId()) === 'authenticator' ? 'selected' : '' ?>>Autenticador de Google / Auth app</option>
+                        <option value="email" <?= Usuario::obtenerMetodo2FA((int) $usuario->getId()) === 'email' ? 'selected' : '' ?>>Código por email</option>
+                    </select>
+                </div>
+                <div class="form-group">
                     <label>Password:</label>
                     <input type="password" name="password">
                     <small>Dejar en blanco para mantener la contraseña actual</small>

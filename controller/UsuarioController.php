@@ -44,10 +44,15 @@ class UsuarioController{
         $email=$_POST["email"];
         $password=$_POST["password"];
         $id_rol = $_POST["id_rol"] ?? null;
+        $twoFactorMethod = Usuario::normalizarMetodo2FA($_POST['two_factor_method'] ?? 'none');
 
         $rol = $id_rol ? Rol::obtenerPorID($id_rol) : null;
         $usuario= new Usuario($idUsuario, $nombre, $email, $password, $rol);
         $usuario->actualizar();
+        $usuario->setId((int) $idUsuario);
+        if ($twoFactorMethod !== 'none' || Usuario::obtenerMetodo2FA((int) $idUsuario) !== 'none') {
+            $usuario->guardarMetodo2FA($twoFactorMethod === 'none' ? Usuario::obtenerMetodo2FA((int) $idUsuario) : $twoFactorMethod);
+        }
 
         header("Location: index.php?controller=usuario&action=listar");
     }
@@ -65,10 +70,17 @@ class UsuarioController{
         $email=$_POST["email"];
         $password=$_POST["password"];
         $id_rol = $_POST["id_rol"] ?? null;
+        $twoFactorMethod = Usuario::normalizarMetodo2FA($_POST['two_factor_method'] ?? 'none');
 
         $rol = $id_rol ? Rol::obtenerPorID($id_rol) : null;
         $usuario= new Usuario(null, $nombre, $email, $password, $rol);
-        $usuario->guardar();
+        $usuarioId = $usuario->guardar();
+        if ($usuarioId) {
+            $usuario->setId((int) $usuarioId);
+            if ($twoFactorMethod !== 'none') {
+                $usuario->guardarMetodo2FA($twoFactorMethod);
+            }
+        }
 
         header("Location: index.php?controller=usuario&action=listar");
     }

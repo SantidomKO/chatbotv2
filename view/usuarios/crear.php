@@ -33,6 +33,14 @@
                         <?php endforeach; ?>
                     </select>
                 </div>
+                <div class="form-group">
+                    <label for="two_factor_method">Verificación en dos pasos</label>
+                    <select id="two_factor_method" name="two_factor_method">
+                        <option value="none">No activar</option>
+                        <option value="authenticator">Autenticador de Google / Auth app</option>
+                        <option value="email">Código por email</option>
+                    </select>
+                </div>
                 <button type="submit" class="btn btn-primary">Crear Usuario</button>
             </form>
         </div>

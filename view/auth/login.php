@@ -24,9 +24,16 @@
             <form action="index.php?controller=auth&action=verificarSegundoFactor" method="POST" class="auth-form">
                 <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token']) ?>">
                 <div class="form-group">
-                    <label for="authenticator-code">Código de la aplicación</label>
+                    <label for="authenticator-code">
+                        <?= (($_SESSION['pending_2fa']['method'] ?? 'authenticator') === 'email') ? 'Código recibido por email' : 'Código de la aplicación' ?>
+                    </label>
                     <input id="authenticator-code" type="text" name="code" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9 ]{6,8}" maxlength="8" required autofocus>
                 </div>
+                <?php if ((($_SESSION['pending_2fa']['method'] ?? 'authenticator') === 'email') && !empty($_SESSION['pending_2fa']['mail_sent']) === false): ?>
+                    <div style="margin-top: 0.75rem; padding: 0.75rem 0.9rem; border: 1px solid rgba(255, 204, 0, 0.5); background: rgba(255, 204, 0, 0.08); color: #ffd75e; border-radius: 10px; font-size: 0.9rem;">
+                        Código de prueba (entorno local): <strong><?= htmlspecialchars((string) ($_SESSION['pending_2fa']['debug_code'] ?? '')) ?></strong>
+                    </div>
+                <?php endif; ?>
                 <div class="form-actions auth-actions">
                     <button type="submit" class="btn btn-primary">Verificar código</button>
                 </div>

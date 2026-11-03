@@ -94,6 +94,11 @@ class Usuario
     }
 
     //Setters
+    public function setId($id)
+    {
+        $this->id = $id;
+    }
+
     public function setNombre($nombre)
     {
         if($nombre==null || $nombre == ""){
@@ -133,6 +138,78 @@ class Usuario
             return $usuario;
         }
         return null;
+    }
+
+    public static function esRolNormal(?Rol $rol = null): bool
+    {
+        if (!$rol) {
+            return true;
+        }
+
+        $nombre = strtolower(trim((string) $rol->getNombre()));
+        return $nombre === 'usuario' || $nombre === 'usuario normal' || $nombre === 'normal';
+    }
+
+    public static function requiere2FA(?Usuario $usuario): bool
+    {
+        if (!$usuario) {
+            return false;
+        }
+
+        $metodo = self::obtenerMetodo2FA($usuario->getId());
+        return in_array($metodo, ['email', 'authenticator'], true);
+    }
+
+    public static function normalizarMetodo2FA($metodo): string
+    {
+        $valor = strtolower(trim((string) ($metodo ?? '')));
+
+        if (in_array($valor, ['email', 'mail', 'correo'], true)) {
+            return 'email';
+        }
+
+        if (in_array($valor, ['authenticator', 'autenticador', 'totp', 'otp'], true)) {
+            return 'authenticator';
+        }
+
+        return 'none';
+    }
+
+    public static function obtenerMetodo2FA($userId): string
+    {
+        if (!$userId) {
+            return 'none';
+        }
+
+        $conexion = Database::getInstance()->getConnection();
+        try {
+            $stmt = $conexion->prepare('SELECT two_factor_method FROM usuarios WHERE id_usuario = ?');
+            $stmt->execute([(int) $userId]);
+            $resultado = $stmt->fetch(PDO::FETCH_ASSOC);
+            if ($resultado && isset($resultado['two_factor_method'])) {
+                return self::normalizarMetodo2FA($resultado['two_factor_method']);
+            }
+        } catch (Throwable $e) {
+            // La columna puede no existir en bases anteriores; cae al valor por defecto seguro.
+        }
+
+        return 'none';
+    }
+
+    public function guardarMetodo2FA(string $metodo): bool
+    {
+        $metodoNormalizado = self::normalizarMetodo2FA($metodo);
+        if (!$this->id) {
+            return true;
+        }
+
+        $conexion = Database::getInstance()->getConnection();
+        try {
+            $stmt = $conexion->prepare('UPDATE usuarios SET two_factor_method = ? WHERE id_usuario = ?');
+            return $stmt->execute([$metodoNormalizado, (int) $this->id]);
+        } catch (Throwable $e) {
+            return true;
+        }
     }
 
     //Getters
