@@ -61,15 +61,16 @@ entrenamiento de una variante puede reemplazar el modelo de las demás.
 `OLLAMA_URL` y `OLLAMA_MODEL` configuran la conexión de las acciones
 personalizadas. El contenedor del servidor de acciones también debe recibir
 estas variables de entorno. Para que Rasa alcance ese servidor dentro de
-Docker, cambiá `action_endpoint.url` en `endpoints.yml` a la dirección de red
-del servicio de acciones (por ejemplo,
-`http://action-server:5055/webhook`). `localhost` dentro de un contenedor solo
-se refiere a ese mismo contenedor.
+Docker, usá la dirección de red del servicio de acciones
+(`http://action-server:5055/webhook`). `endpoints.docker.yml` ya está preparada
+para Compose; en una instalación local, `endpoints.yml` conserva
+`http://localhost:5055/webhook`. `localhost` dentro de un contenedor solo se
+refiere a ese mismo contenedor.
 
-Al usar Docker Compose, el servicio PHP puede cargar `.env` con `env_file: .env`;
-configurá de forma equivalente las variables que necesite cada otro servicio.
-No publiques los puertos de MySQL o Rasa a Internet. Para probar la conexión
-PHP/MySQL, ejecutá `php test_db.php` desde el entorno donde corre PHP.
+Docker Compose lee `.env` para interpolar la configuración y entrega a cada
+contenedor solo las variables que necesita. No publiques los puertos de MySQL o
+Rasa a Internet. Para probar la conexión PHP/MySQL, ejecutá `php test_db.php`
+desde el entorno donde corre PHP.
 
 Notas importantes:
 - El dominio está dividido en `domain/` para que el generador pueda regenerar
@@ -77,6 +78,112 @@ Notas importantes:
 - El archivo `config.yml` contiene la configuración de `pipeline` y
   `policies` usada para entrenar; el generador puede (y debe
   en el futuro) leerlo dinámicamente.
+
+## Despliegue completo con Docker Compose
+
+El stack de prueba incluye la aplicación PHP/Apache, MariaDB, Rasa, el servidor
+de acciones y Ollama. Docker Compose conecta los servicios en una red privada:
+PHP usa `mysql` y `rasa` como hosts; Rasa usa `action-server`; y las acciones
+usan `ollama`. Solo se publica el puerto HTTP de la aplicación.
+
+### Requisitos
+
+- Docker Engine con el complemento **Docker Compose v2** (`docker compose`).
+- Para usar Ollama, suficiente espacio en disco para descargar la imagen y el
+  modelo configurado. El modelo predeterminado `gemma3:1b` se descarga durante
+  el primer inicio; por defecto Ollama usa CPU.
+
+Si Docker está instalado pero `docker compose` no existe, instalá el
+complemento Compose v2 siguiendo la
+[guía oficial de Docker](https://docs.docker.com/compose/install/linux/).
+Verificá que tu usuario pueda acceder al daemon (`docker info`). Si no tiene
+acceso, necesitás permisos de administrador para ejecutar Docker con `sudo`
+(por ejemplo, `sudo docker compose up -d --build`) o configurar acceso para tu
+cuenta. Agregar un usuario al grupo `docker` equivale prácticamente a darle
+privilegios de root; utilizá únicamente cuentas de confianza.
+
+El complemento Compose puede instalarse en la cuenta del usuario, pero eso no
+otorga acceso al daemon: un administrador debe configurar ese permiso por
+separado. Si `sudo` informa que tu cuenta no está autorizada, pedile a quien
+administra el servidor que instale el complemento y habilite el acceso de
+Docker.
+
+### Preparar y arrancar
+
+Desde la raíz del repositorio:
+
+1. Creá la configuración local si todavía no existe:
+
+   ```bash
+   cp .env.example .env
+   ```
+
+2. Ejecutá dos veces, por separado, `openssl rand -hex 32` y reemplazá en
+   `.env` los valores de `DB_PASSWORD` y `DB_ROOT_PASSWORD` por los resultados.
+   No uses la contraseña de Linux, no compartas esos valores y no subas `.env`
+   a Git. En Linux, configurá también `LOCAL_GID` con el resultado de `id -g`;
+   así PHP puede guardar los YAML y modelos generados en las carpetas
+   compartidas sin cambiar sus permisos.
+   `APP_PORT` permite cambiar el puerto publicado (por defecto `8080`).
+3. Construí y arrancá todos los servicios:
+
+   ```bash
+   docker compose up -d --build
+   ```
+
+   El primer inicio puede tardar varios minutos: MariaDB importa
+   `chatbot_v2.sql`, Rasa carga el modelo y Ollama descarga
+   `OLLAMA_MODEL`.
+4. Consultá el estado y los registros:
+
+   ```bash
+   docker compose ps
+   docker compose logs -f app mysql rasa action-server ollama
+   ```
+
+5. Abrí <http://localhost:8080/chatbotv2/> (o el puerto que configuraste en
+   `APP_PORT`). Por seguridad, el puerto se limita a la propia máquina por
+   defecto. Para permitir acceso desde la red, configurá
+   `APP_BIND_ADDRESS=0.0.0.0` en `.env` y protegé el servidor con firewall y un
+   proxy inverso HTTPS antes de usarlo con otras personas.
+
+El usuario `root` de Linux no interviene en la configuración de los
+contenedores. MariaDB tiene una contraseña de root propia (`DB_ROOT_PASSWORD`)
+y PHP se conecta con el usuario de aplicación (`DB_USER`). El archivo SQL
+inicializa la base únicamente cuando el volumen de MariaDB está vacío; cambiar
+las variables después no modifica las contraseñas o los datos de un volumen ya
+creado. El SQL puede incluir cuentas de prueba de la aplicación: verificá y
+cambiá sus contraseñas antes de poner el sitio en una red compartida.
+
+### Operaciones habituales
+
+```bash
+# Seguir los registros de un servicio
+docker compose logs -f app
+
+# Detener los servicios sin borrar la base ni el modelo de Ollama
+docker compose down
+
+# Reconstruir y aplicar cambios al código
+docker compose up -d --build
+
+# Entrenar Rasa con los YAML del repositorio
+docker compose run --rm rasa train --domain domain/ --out /models
+docker compose restart rasa
+```
+
+Los datos de MariaDB y los modelos descargados de Ollama se guardan en
+volúmenes persistentes; el modelo Rasa, junto con los YAML generados por PHP,
+queda en `models/`, `data/` y `domain/` en el repositorio.
+`docker compose down -v` elimina permanentemente los volúmenes de MariaDB y
+Ollama: usalo solo si querés borrar esos datos y empezar de cero.
+
+`endpoints.docker.yml` configura la dirección interna del action server y no
+reemplaza `endpoints.yml`, que continúa disponible para el uso local descripto
+arriba. El puerto de Rasa, MariaDB y Ollama no se publica al host. Para un
+servidor accesible desde Internet, agregá un proxy inverso con HTTPS y
+restricciones de acceso antes de publicar la aplicación; este Compose está
+pensado para pruebas y no configura TLS ni copias de seguridad.
 
 ## Flujo de reentrenado (server-side)
 

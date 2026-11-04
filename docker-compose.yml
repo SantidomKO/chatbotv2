@@ -1,0 +1,128 @@
+services:
+  mysql:
+    image: mariadb:10.11
+    restart: unless-stopped
+    environment:
+      MARIADB_DATABASE: ${DB_NAME:-chatbot_v2}
+      MARIADB_USER: ${DB_USER:-chatbot_app}
+      MARIADB_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in .env}
+      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:?Set DB_ROOT_PASSWORD in .env}
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./chatbot_v2.sql:/docker-entrypoint-initdb.d/001-chatbot.sql:ro
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+
+  rasa:
+    build:
+      context: .
+      dockerfile: docker/rasa.Dockerfile
+    restart: unless-stopped
+    depends_on:
+      action-server:
+        condition: service_healthy
+    command:
+      - run
+      - --enable-api
+      - --host
+      - 0.0.0.0
+      - --port
+      - "5005"
+      - --model
+      - /models
+      - --endpoints
+      - endpoints.docker.yml
+    volumes:
+      - ./models:/models
+      - ./data:/app/data
+      - ./domain:/app/domain
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request; urllib.request.urlopen('http://127.0.0.1:5005/status', timeout=5)"
+      interval: 15s
+      timeout: 10s
+      retries: 20
+      start_period: 120s
+
+  ollama:
+    image: ollama/ollama:latest
+    restart: unless-stopped
+    volumes:
+      - ollama-data:/root/.ollama
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
+
+  ollama-model:
+    image: ollama/ollama:latest
+    restart: "no"
+    depends_on:
+      ollama:
+        condition: service_healthy
+    environment:
+      OLLAMA_HOST: http://ollama:11434
+      OLLAMA_MODEL: ${OLLAMA_MODEL:-gemma3:1b}
+    entrypoint: ["/bin/sh", "-c"]
+    command: ["ollama pull \"$${OLLAMA_MODEL}\""]
+
+  action-server:
+    build:
+      context: .
+      dockerfile: actions/Dockerfile
+    restart: unless-stopped
+    environment:
+      OLLAMA_URL: ${OLLAMA_URL:-http://ollama:11434/api/chat}
+      OLLAMA_MODEL: ${OLLAMA_MODEL:-gemma3:1b}
+    depends_on:
+      ollama-model:
+        condition: service_completed_successfully
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request; urllib.request.urlopen('http://127.0.0.1:5055/health', timeout=5)"
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 15s
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        LOCAL_GID: ${LOCAL_GID:-1000}
+    restart: unless-stopped
+    environment:
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_NAME: ${DB_NAME:-chatbot_v2}
+      DB_USER: ${DB_USER:-chatbot_app}
+      DB_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in .env}
+      RASA_URL: http://rasa:5005
+    volumes:
+      - ./models:/models
+      - ./data:/var/www/html/data
+      - ./domain:/var/www/html/domain
+    depends_on:
+      mysql:
+        condition: service_healthy
+      rasa:
+        condition: service_healthy
+    ports:
+      - "${APP_BIND_ADDRESS:-127.0.0.1}:${APP_PORT:-8080}:80"
+
+volumes:
+  mysql-data:
+  ollama-data:
