@@ -37,6 +37,38 @@ La política depende del rol:
 
 La verificación por correo sirve como alternativa cuando no hay un autenticador activo. Para cuentas con direcciones ficticias en pruebas locales, el código se muestra en la consola del navegador al acceder desde localhost. Esta función también se puede activar en desarrollo con `DEBUG_2FA_CODE=true`. No debe habilitarse en producción: quien pueda ver la consola podría obtener el segundo factor.
 
+### Flujo de registro de una cuenta nueva
+
+Una persona que todavía no tiene cuenta puede registrarse desde el enlace **Regístrate** de la pantalla de inicio de sesión. El formulario solicita nombre, correo, contraseña, confirmación de contraseña y una preferencia de segundo factor. La elección de 2FA es opcional para el rol normal que se asigna durante el registro.
+
+```mermaid
+flowchart TD
+    A[Completar formulario de registro] --> B{Datos válidos y correo disponible?}
+    B -->|No| C[Mostrar error y volver al formulario]
+    B -->|Sí| D[Crear cuenta de rol normal y guardar contraseña hasheada]
+    D --> E{Preferencia de segundo factor}
+    E -->|none| F[Guardar cuenta sin método adicional]
+    E -->|email| G[Guardar preferencia de código por email]
+    E -->|authenticator| H[Guardar preferencia de autenticador]
+    F --> I[Redirigir al inicio de sesión]
+    G --> I
+    H --> I
+    I --> J[Iniciar sesión con correo y contraseña]
+    J --> K{Método de 2FA}
+    K -->|none| L[Crear sesión autenticada]
+    K -->|email| M[Solicitar código enviado por email]
+    K -->|authenticator aún no configurado| M
+    K -->|authenticator configurado| N[Solicitar código TOTP]
+    M --> O{Código correcto?}
+    N --> O
+    O -->|No| P[Rechazar el acceso]
+    O -->|Sí| L
+```
+
+El servidor valida que los campos obligatorios estén completos, que ambas contraseñas coincidan y que el correo no esté registrado. Si el alta se completa, guarda la contraseña con `password_hash()`, asigna el rol normal y persiste la preferencia de 2FA cuando se eligió `email` o `authenticator`. Después muestra un mensaje de éxito y redirige a la pantalla de inicio de sesión; el registro no inicia una sesión autenticada automáticamente.
+
+La selección de **Código por email** hace que los inicios de sesión posteriores soliciten un código enviado al correo. Si se selecciona **Autenticador**, la cuenta primero debe completar su inscripción desde **Mi perfil** después de iniciar sesión. Mientras TOTP no esté activado, el inicio de sesión usa el código por email como alternativa; una vez configurado, solicita el código TOTP. Si se elige **No activar**, una cuenta con el rol normal puede iniciar sesión solo con correo y contraseña.
+
 ## 3. Flujo de inicio de sesión
 
 ```mermaid
