@@ -70,6 +70,8 @@ private function enviarCodigoPorMail(string $email, string $codigo): void
 
 Actualmente usa `mail()` de PHP. En un entorno real, conviene sustituirlo por SMTP confiable o por una librería como PHPMailer.
 
+Para probar cuentas con direcciones de correo ficticias desde localhost, el código de los desafíos por email se muestra automáticamente en la consola del navegador mientras se encuentre pendiente. En otros entornos de desarrollo se puede activar `DEBUG_2FA_CODE=true` en el archivo `.env`. Mantén esta opción desactivada fuera del desarrollo local, ya que el código es el segundo factor de autenticación.
+
 ## Base de datos
 
 Se agregó la columna `two_factor_method` a la tabla `usuarios`:

@@ -1,5 +1,14 @@
 <?php 
     $title = "Login";
+    require_once __DIR__ . '/../../app_config.php';
+    $debug2FACodeEnabled = filter_var(
+        app_config('DEBUG_2FA_CODE', 'false'),
+        FILTER_VALIDATE_BOOLEAN
+    ) || in_array(
+        strtolower((string) ($_SERVER['REMOTE_ADDR'] ?? '')),
+        ['127.0.0.1', '::1', '::ffff:127.0.0.1'],
+        true
+    );
     require_once __DIR__ . '/../layout/header.php';
 ?>
 <div class="auth-shell">
@@ -21,6 +30,20 @@
             <?php unset($_SESSION['success']); ?>
         <?php endif; ?>
         <?php if (isset($_SESSION['pending_2fa'])): ?>
+            <?php if (
+                ($_SESSION['pending_2fa']['method'] ?? '') === 'email'
+                && $debug2FACodeEnabled
+            ): ?>
+                <script>
+                    console.warn(
+                        'Local testing only — 2FA email code (expires in 5 minutes):',
+                        <?= json_encode(
+                            (string) ($_SESSION['pending_2fa']['debug_code'] ?? ''),
+                            JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT
+                        ) ?>
+                    );
+                </script>
+            <?php endif; ?>
             <form action="index.php?controller=auth&action=verificarSegundoFactor" method="POST" class="auth-form">
                 <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token']) ?>">
                 <div class="form-group">
