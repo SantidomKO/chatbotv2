@@ -143,7 +143,7 @@ class Usuario
     public static function esRolNormal(?Rol $rol = null): bool
     {
         if (!$rol) {
-            return true;
+            return false;
         }
 
         $nombre = strtolower(trim((string) $rol->getNombre()));
@@ -154,6 +154,10 @@ class Usuario
     {
         if (!$usuario) {
             return false;
+        }
+
+        if (!self::esRolNormal($usuario->getRol())) {
+            return true;
         }
 
         $metodo = self::obtenerMetodo2FA($usuario->getId());

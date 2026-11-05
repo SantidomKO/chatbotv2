@@ -5,7 +5,7 @@
 Este proyecto permite diferenciar la política de verificación en dos pasos según el rol del usuario:
 
 - usuarios normales: el 2FA es opcional y puede elegirse al registrarse;
-- usuarios con otros roles: el 2FA es obligatorio y si no tienen autenticador configurado se usa una alternativa por email.
+- usuarios con cualquier otro rol (o sin rol): el 2FA es obligatorio; si no tienen autenticador configurado se usa una alternativa por email.
 
 La idea es evitar que el requisito sea fijo para todos, pero sí reforzar la seguridad para perfiles con mayor acceso o responsabilidades administrativas.
 
@@ -14,19 +14,18 @@ La idea es evitar que el requisito sea fijo para todos, pero sí reforzar la seg
 La lógica quedó centralizada en el modelo de usuario y en el controlador de autenticación:
 
 - `Usuario::esRolNormal()` define si un rol es un usuario normal.
-- `Usuario::requiere2FA()` revisa el método elegido por la cuenta y no fuerza el 2FA por rol.
+- `Usuario::requiere2FA()` obliga a todos los roles que no sean de usuario normal a completar 2FA, independientemente de la preferencia guardada.
 - `Usuario::normalizarMetodo2FA()` convierte las opciones de configuración a un valor uniforme.
 - `Usuario::obtenerMetodo2FA()` lee el método persistido por usuario.
-- `AuthController::resolverMetodo2FA()` determina si se usa autenticador, email o ninguna verificación según la preferencia real del usuario.
+- `AuthController::resolverMetodo2FA()` usa el autenticador activo cuando está configurado; para roles obligados sin autenticador, requiere un código por email.
 
 ### Regla de negocio
 
-1. Cada usuario puede elegir su método de segundo factor: `ninguno`, `email` o `authenticator`.
-2. Los roles administrativos y no normales no tienen una restricción fija por rol; pueden elegir usar email para cada inicio o configurar el autenticador y evitar repetir el mail.
-3. Los usuarios normales también pueden elegir exactamente lo mismo o dejarlo en `No activar`.
-4. Si el usuario elige `authenticator` pero aún no lo configura, la aplicación lo lleva a Mi perfil para completarlo.
-5. Si el usuario elige `email`, cada login requiere el código enviado por correo.
-6. Si elige `none`, accede sin mail ni autenticador.
+1. Los usuarios normales pueden elegir `none`, `email` o `authenticator`.
+2. Los roles administrativos y demás roles no normales siempre deben completar un segundo factor, aunque la preferencia guardada sea `none`.
+3. Si se eligió `authenticator` y está activado, el login requiere un código TOTP.
+4. Si el autenticador no está activado, o no se eligió un método, los roles obligados reciben un código por email.
+5. Si un usuario normal elige `email`, cada login requiere el código enviado por correo; si elige `none`, puede iniciar sesión sin segundo factor.
 
 ## Registro
 
@@ -92,8 +91,8 @@ Queda una prueba de la política en:
 
 Esa prueba valida:
 
-- que el rol normal no requiere 2FA obligatorio;
-- que un rol no normal sí lo requiere;
+- que el rol normal se distingue de los roles obligados;
+- que un rol no normal y una cuenta sin rol requieren 2FA;
 - que el método `MAIL` se normaliza a `email`;
 - que el método `authenticator` se mantiene.
 
@@ -110,13 +109,6 @@ Esa prueba valida:
 
 La alternativa por email no reemplaza el uso de un autenticador cuando el usuario ya lo configuró, pero sí sirve como fallback obligatorio para perfiles que no tienen esa configuración activa. En producción conviene que el envío de emails use un servidor SMTP verificado para evitar bloqueo en proveedores de correo y evitar reproducir mensajes como spam.
 
-## Ajuste final del flujo
+## Política efectiva en el login
 
-Se corrigió la política para que ya no exista una imposición por rol:
-
-1. cada usuario puede decidir en el registro o desde la edición del perfil si quiere usar `No activar`, `Email` o `Autenticador`;
-2. si elige `Autenticador` pero aún no lo configura, se le redirige a Mi perfil para hacerlo;
-3. si elige `Email`, cada inicio de sesión pide el código por correo;
-4. si elige `No activar`, ingresa sin mail ni autenticador.
-
-Esto permite que los administradores y demás roles no normales también decidan si prefieren no ver el mail en cada ingreso y setear el autenticador, mientras que los usuarios normales pueden mantener el acceso sencillo y sin 2FA si así lo quieren.
+Las preferencias de 2FA no pueden desactivar el requisito para cuentas no normales. Estas cuentas deben completar un desafío en cada inicio de sesión: TOTP si el autenticador está activo, o código por email si no lo está. Solo los usuarios normales pueden iniciar sesión con `none`.

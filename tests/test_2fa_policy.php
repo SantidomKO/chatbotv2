@@ -17,6 +17,24 @@ if (Usuario::esRolNormal($rolAdmin)) {
     throw new RuntimeException('Los roles no normales sí deben requerir 2FA.');
 }
 
+$usuarioAdmin = (new ReflectionClass(Usuario::class))->newInstanceWithoutConstructor();
+$propiedadRol = new ReflectionProperty(Usuario::class, 'rol');
+$propiedadRol->setAccessible(true);
+$propiedadRol->setValue($usuarioAdmin, $rolAdmin);
+if (!Usuario::requiere2FA($usuarioAdmin)) {
+    throw new RuntimeException('Un administrador debe requerir 2FA aunque su preferencia esté en none.');
+}
+
+$propiedadRol->setValue($usuarioAdmin, $rolUsuario);
+if (Usuario::requiere2FA($usuarioAdmin)) {
+    throw new RuntimeException('Un usuario normal sin método configurado no debería requerir 2FA.');
+}
+
+$propiedadRol->setValue($usuarioAdmin, null);
+if (!Usuario::requiere2FA($usuarioAdmin)) {
+    throw new RuntimeException('Una cuenta sin rol debe requerir 2FA por seguridad.');
+}
+
 if (Usuario::normalizarMetodo2FA('MAIL') !== 'email') {
     throw new RuntimeException('El método de 2FA por email no se normalizó correctamente.');
 }

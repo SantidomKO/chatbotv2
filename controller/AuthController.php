@@ -231,19 +231,15 @@ class AuthController
         $authenticator = new Authenticator();
         $metodoUsuario = Usuario::obtenerMetodo2FA($usuario->getId());
 
-        if ($metodoUsuario === 'authenticator' && $authenticator->isEnabled($usuario->getId())) {
-            return 'authenticator';
+        if (!Usuario::requiere2FA($usuario)) {
+            return 'none';
         }
 
-        if ($metodoUsuario === 'authenticator' && !$authenticator->isEnabled($usuario->getId())) {
-            return 'email';
+        if ($metodoUsuario === 'authenticator') {
+            return $authenticator->isEnabled($usuario->getId()) ? 'authenticator' : 'email';
         }
 
-        if ($metodoUsuario === 'email') {
-            return 'email';
-        }
-
-        return 'none';
+        return 'email';
     }
 
     private function enviarCodigoPorMail(string $email, string $codigo): bool
