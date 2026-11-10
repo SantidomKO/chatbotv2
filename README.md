@@ -86,6 +86,47 @@ de acciones y Ollama. Docker Compose conecta los servicios en una red privada:
 PHP usa `mysql` y `rasa` como hosts; Rasa usa `action-server`; y las acciones
 usan `ollama`. Solo se publica el puerto HTTP de la aplicación.
 
+### Bootstrap automático para Linux
+
+Este repositorio incluye un script que crea la configuración de `.env` desde
+cero y levanta la pila sin requerir editar valores manuales en cada máquina:
+
+```bash
+chmod +x scripts/bootstrap_docker.sh
+./scripts/bootstrap_docker.sh
+```
+
+Qué hace el script:
+
+- genera un `.env` portátil para Linux con valores por defecto seguros;
+- crea contraseñas aleatorias para MariaDB;
+- infiere `LOCAL_GID` del host cuando es posible;
+- fija `APP_BIND_ADDRESS=0.0.0.0` y `APP_PORT=8080` para que funcione en
+  cualquier máquina Linux con Docker;
+- usa nombres de servicio de Docker (`mysql`, `rasa`, `ollama`) en lugar de
+  `localhost` o IPs del host, para que la conexión funcione dentro de la red
+  privada del stack;
+- si Docker está instalado, arranca `docker compose up -d --build`
+  automáticamente.
+
+Para generar el archivo `.env` sin levantar contenedores:
+
+```bash
+./scripts/bootstrap_docker.sh --dry-run
+```
+
+Y para solo generar la configuración y no iniciar Docker:
+
+```bash
+./scripts/bootstrap_docker.sh --no-up
+```
+
+El contenedor de la app monta el repositorio completo en `/var/www/html` y
+instala Git con `git config --global --add safe.directory '*'`. Eso permite
+hacer `git pull` desde dentro del contenedor sin romper permisos ni provocar
+errores por ownership del repositorio, aunque el servidor esté ubicado en otra
+máquina Linux.
+
 ### Requisitos
 
 - Docker Engine con el complemento **Docker Compose v2** (`docker compose`).
