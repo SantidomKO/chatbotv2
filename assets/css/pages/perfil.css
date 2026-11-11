@@ -1,0 +1,26 @@
+/* Profile page styles */
+.profile-card {
+    background: rgba(17, 19, 24, 0.9);
+    border: 1px solid rgba(0, 255, 255, 0.18);
+    border-radius: 12px;
+    padding: 1.25rem;
+}
+
+.profile-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1rem;
+}
+
+.profile-label {
+    color: var(--muted-2);
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.profile-value {
+    color: var(--text);
+    margin-top: 0.25rem;
+    font-size: 1rem;
+}

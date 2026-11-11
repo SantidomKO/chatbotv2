@@ -4,9 +4,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo $title ?? 'Chatbot' ?></title>
-    <link rel="stylesheet" href="<?php echo BASE_URL; ?>assets/css/style.css">
-    <link rel="stylesheet" href="<?php echo BASE_URL; ?>assets/css/form_style.css">
-    <link rel="stylesheet" href="<?php echo BASE_URL; ?>assets/css/sidebar.css">
+    <?php
+    $globalStyles = $globalStyles ?? [
+        'assets/css/style.css',
+        'assets/css/form_style.css',
+        'assets/css/sidebar.css',
+    ];
+    $pageStyles = $pageStyles ?? [];
+    $resolvedStyles = array_values(array_unique(array_merge($globalStyles, $pageStyles)));
+    foreach ($resolvedStyles as $cssPath) {
+        $cssUrl = strpos($cssPath, 'http://') === 0 || strpos($cssPath, 'https://') === 0
+            ? $cssPath
+            : BASE_URL . ltrim($cssPath, '/');
+        echo '    <link rel="stylesheet" href="' . htmlspecialchars($cssUrl) . '">\n';
+    }
+    ?>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <style>
         .mobile-menu-btn {

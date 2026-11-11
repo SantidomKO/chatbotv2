@@ -11,6 +11,22 @@ define('BASE_URL', 'http://' . $_SERVER['HTTP_HOST'] . '/chatbotv2/');
 
 require_once "controller/RolController.php";
 
+$globalStyles = [
+    'assets/css/style.css',
+    'assets/css/sidebar.css',
+    'assets/css/form_style.css',
+];
+$pageStyles = [];
+
+function addPageStyle(string $cssPath): void
+{
+    global $pageStyles;
+
+    if (!in_array($cssPath, $pageStyles, true)) {
+        $pageStyles[] = $cssPath;
+    }
+}
+
 $controller = $_GET["controller"] ?? 'auth';
 $action = $_GET["action"] ?? 'login';
 
@@ -23,6 +39,7 @@ $usuario = $_SESSION['usuario'] ?? null;
 
 switch ($controller) {
     case 'auth':
+        addPageStyle('assets/css/pages/auth.css');
         require_once "controller/AuthController.php";
         $authController = new AuthController();
         switch ($action) {
@@ -53,6 +70,7 @@ switch ($controller) {
         }
         break;
     case 'chat':
+        addPageStyle('assets/css/pages/chat.css');
         require_once "controller/ChatController.php";
         $chatController = new ChatController();
         switch ($action) {
@@ -68,6 +86,7 @@ switch ($controller) {
         }
         break;
     case 'conocimiento':
+        addPageStyle('assets/css/pages/conocimiento.css');
         require_once "controller/ConocimientoController.php";
         $conocimientoController = new ConocimientoController();
         switch ($action) {
@@ -113,6 +132,7 @@ switch ($controller) {
         }
         break;
     case 'rol':
+        addPageStyle('assets/css/pages/roles.css');
         $rolController = new RolController();
         switch ($action) {
             case 'listar':
@@ -139,6 +159,7 @@ switch ($controller) {
         }
         break;
     case 'permiso':
+        addPageStyle('assets/css/pages/permisos.css');
         require_once "controller/PermisoController.php";
         $permisoController = new PermisoController();
         switch ($action) {
@@ -202,6 +223,7 @@ switch ($controller) {
         }
         break;
     case 'intent':
+        addPageStyle('assets/css/pages/intents.css');
         require_once "controller/IntentController.php";
         $intentController = new IntentController();
         switch ($action) {
@@ -229,6 +251,7 @@ switch ($controller) {
         }
         break;
     case 'usuario':
+        addPageStyle('assets/css/pages/usuarios.css');
         require_once "controller/UsuarioController.php";
         $usuarioController = new UsuarioController();
         switch ($action) {
@@ -256,6 +279,7 @@ switch ($controller) {
         }
         break; 
     case 'perfil':
+        addPageStyle('assets/css/pages/perfil.css');
         require_once "controller/PerfilController.php";
         $perfilController = new PerfilController();
         switch ($action) {
@@ -277,6 +301,7 @@ switch ($controller) {
         }
         break;
     case 'consultas':
+        addPageStyle('assets/css/pages/consultas.css');
         require_once "controller/ConsultasController.php";
         $consultasController = new ConsultasController();
         switch ($action) {

@@ -1,0 +1,57 @@
+/* Intents and other admin list/detail pages */
+.table-container {
+    overflow-x: auto;
+    padding: 0;
+}
+
+.objects-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9375rem;
+}
+
+.objects-table thead {
+    background: var(--highlight);
+    border-bottom: 2px solid var(--accent);
+}
+
+.objects-table th {
+    text-align: left;
+    padding: 1rem 1.5rem;
+    font-weight: 600;
+    color: var(--accent);
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+    text-shadow: 0 0 3px rgba(0, 255, 255, 0.5);
+}
+
+.objects-table td {
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid var(--panel-2);
+    color: var(--muted);
+}
+
+.objects-table tbody tr {
+    transition: background-color 0.2s ease;
+}
+
+.objects-table tbody tr:hover {
+    background: var(--panel-2);
+    box-shadow: inset 0 0 8px rgba(0, 255, 255, 0.15);
+}
+
+.objects-table tbody tr:nth-child(even) {
+    background-color: rgba(13, 15, 23, 1);
+}
+
+.objects-table tbody tr:nth-child(even):hover {
+    background-color: #161b28;
+}
+
+@media (max-width: 768px) {
+    .objects-table th,
+    .objects-table td {
+        padding: 0.875rem 1rem;
+    }
+}
