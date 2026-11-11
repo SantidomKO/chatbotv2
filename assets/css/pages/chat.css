@@ -1,5 +1,6 @@
 /* Chat page styles */
 .chatbot-shell {
+    position: relative;
     width: calc(100% - 240px);
     max-width: 1180px;
     min-height: calc(100vh - 4rem);

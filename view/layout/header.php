@@ -16,7 +16,7 @@
         $cssUrl = strpos($cssPath, 'http://') === 0 || strpos($cssPath, 'https://') === 0
             ? $cssPath
             : BASE_URL . ltrim($cssPath, '/');
-        echo '    <link rel="stylesheet" href="' . htmlspecialchars($cssUrl) . '">\n';
+        echo '    <link rel="stylesheet" href="' . htmlspecialchars($cssUrl) . '">' . PHP_EOL;
     }
     ?>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
