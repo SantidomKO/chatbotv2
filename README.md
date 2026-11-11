@@ -101,8 +101,7 @@ Qué hace el script:
 - genera un `.env` portátil para Linux con valores por defecto seguros;
 - crea contraseñas aleatorias para MariaDB;
 - infiere `LOCAL_GID` del host cuando es posible;
-- fija `APP_BIND_ADDRESS=0.0.0.0` y `APP_PORT=8080` para que funcione en
-  cualquier máquina Linux con Docker;
+- fija `APP_BIND_ADDRESS=0.0.0.0` y `APP_PORT=8080` para que funcione en cualquier máquina Linux con Docker;
 - usa nombres de servicio de Docker (`mysql`, `rasa`, `ollama`) en lugar de
   `localhost` o IPs del host, para que la conexión funcione dentro de la red
   privada del stack;

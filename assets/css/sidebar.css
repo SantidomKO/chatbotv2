@@ -1,9 +1,6 @@
-:root {
+.sidebar {
     --sidebar-width: 200px;
     --sidebar-collapsed-width: 50px;
-}
-
-.sidebar {
     background: linear-gradient(180deg, #0d1117 0%, #111318 60%, #0b0d12 100%);
     position: fixed;
     top: 0;
@@ -68,7 +65,6 @@
 .sidebar.collapsed::before,
 .sidebar.collapsed .sidebar-section h2,
 .sidebar.collapsed .sidebar-section a span:last-child,
-.sidebar.collapsed .sidebar-image-container,
 .sidebar.collapsed .section-toggle {
     display: none;
 }
@@ -243,7 +239,7 @@
 
 /* Responsive sidebar */
 @media (max-width: 1024px) {
-    :root {
+    .sidebar {
         --sidebar-width: 180px;
     }
 }

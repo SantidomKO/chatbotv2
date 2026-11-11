@@ -76,14 +76,6 @@
     border-radius: 8px;
 }
 
-/* Header-right inside form pages: keep the existing btn look, align right */
-body > .header-right {
-    max-width: 680px;
-    margin: 1.25rem auto 0;
-    display: flex;
-    justify-content: flex-end;
-}
-
 /* Auth views */
 .auth-shell {
     min-height: calc(100vh - 6rem);
