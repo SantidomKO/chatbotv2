@@ -189,6 +189,43 @@ ensure_docker() {
   exit 1
 }
 
+rasa_source_fingerprint() {
+  find \
+    "$PROJECT_ROOT/config.yml" \
+    "$PROJECT_ROOT/domain" \
+    "$PROJECT_ROOT/data" \
+    "$PROJECT_ROOT/docker/rasa.Dockerfile" \
+    -type f -print0 |
+    sort -z |
+    xargs -0 sha256sum |
+    sha256sum |
+    cut -d ' ' -f 1
+}
+
+ensure_rasa_model() {
+  local marker="$PROJECT_ROOT/.rasa-model-fingerprint"
+  local fingerprint=""
+  local model_archive=""
+
+  mkdir -p "$PROJECT_ROOT/models"
+  fingerprint="$(rasa_source_fingerprint)"
+  model_archive="$(find "$PROJECT_ROOT/models" -maxdepth 1 -type f -name '*.tar.gz' -print -quit)"
+
+  if [[ -n "$model_archive" && -f "$marker" && "$(cat "$marker")" == "$fingerprint" ]]; then
+    echo "Rasa model matches the current training files; skipping training."
+    return
+  fi
+
+  echo "Training the Rasa model from the current domain and training data..."
+  if [[ "$DOCKER_COMPOSE_MODE" == "plugin" ]]; then
+    (cd "$PROJECT_ROOT" && "${DOCKER_PREFIX[@]}" docker compose run --build --rm --no-deps rasa train --domain domain/ --out /models)
+  else
+    (cd "$PROJECT_ROOT" && "${DOCKER_PREFIX[@]}" docker-compose run --build --rm --no-deps rasa train --domain domain/ --out /models)
+  fi
+
+  printf '%s\n' "$fingerprint" > "$marker"
+}
+
 APP_PORT="8080"
 APP_BIND_ADDRESS="0.0.0.0"
 LOCAL_GID="1000"
@@ -241,6 +278,7 @@ fi
 
 if [[ "$DOCKER_UP" -eq 1 ]]; then
   ensure_docker
+  ensure_rasa_model
   if [[ "$DOCKER_COMPOSE_MODE" == "plugin" ]]; then
     echo "Starting Docker stack..."
     (cd "$PROJECT_ROOT" && "${DOCKER_PREFIX[@]}" docker compose up -d --build)

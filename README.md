@@ -56,7 +56,10 @@ El script:
    contenedores.
 2. Usa el puerto `8080` y calcula `LOCAL_GID` cuando puede, para facilitar que
    la aplicación escriba archivos compartidos con el host.
-3. Comprueba que Docker esté disponible, construye las imágenes y ejecuta
+3. Compara los archivos de entrenamiento con la última marca local y entrena
+   Rasa si el modelo falta o los datos cambiaron. El primer entrenamiento puede
+   tardar varios minutos.
+4. Comprueba que Docker esté disponible, construye las imágenes y ejecuta
    `docker compose up -d --build`.
 
 Si `.env` ya existe, el script lo deja intacto; no cambia sus valores ni sus

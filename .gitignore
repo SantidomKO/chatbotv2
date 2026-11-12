@@ -1,6 +1,7 @@
 venv/
 .venv/
 .rasa/
+.rasa-model-fingerprint
 __pycache__/
 *.pyd
 *.dll
