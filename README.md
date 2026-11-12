@@ -312,6 +312,13 @@ respuestas escritas siguen funcionando.
 - **PHP no conecta con MariaDB en Docker:** comprobá que `DB_HOST` sea `mysql`,
   que los servicios estén saludables (`docker compose ps`) y que las
   credenciales de `.env` correspondan al volumen existente.
+- **Se interrumpe o parece trabarse una descarga de Ollama:** `ollama/ollama`
+  es la imagen Docker; `gemma3:1b` es el modelo que Ollama descarga después.
+  Podés volver a ejecutar `docker compose up -d --build`: Docker reutiliza las
+  capas ya descargadas y Ollama conserva el modelo en el volumen `ollama-data`.
+  Para ver el progreso del modelo, usá `docker compose logs -f ollama-model`;
+  `Ctrl+C` en ese comando solo deja de mostrar los registros. No uses
+  `docker compose down -v` para reintentar, porque también borra los volúmenes.
 - **Rasa no conecta con las acciones:** en Docker, verificá
   `endpoints.docker.yml` y que `action-server` esté saludable. En modo local,
   verificá que el servidor de acciones esté en ejecución y que se use
