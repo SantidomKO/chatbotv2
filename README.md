@@ -1,324 +1,304 @@
-# Chatbot (chatbotv2) — guía rápida y estructura
+# Chatbot (chatbotv2)
 
-Este repositorio contiene la parte web (PHP) que gestiona el conocimiento del chatbot para
-editar intents/respuestas y sincronizarlos con Rasa, además de helpers para
-generar el YAML de entrenamiento y disparar el reentrenado y la recarga del
-modelo en Rasa.
+Aplicación web en PHP para administrar el conocimiento del chatbot y conectarlo
+con Rasa. La web construye los datos de entrenamiento a partir de la base de
+datos, solicita a Rasa que entrene un modelo y, si el entrenamiento termina
+bien, le pide que cargue el modelo nuevo.
 
-Resumen rápido: la web genera en memoria el YAML combinado (NLU, domain,
-rules, stories) a partir de la base de datos y envía ese contenido a Rasa
-(`/model/train`). Si Rasa devuelve el archivo `.tar.gz`, la web lo guarda
-en un directorio local y hace un `PUT /model` para recargarlo en caliente.
+Esta guía cubre primero la forma recomendada de probar el proyecto con Docker
+Compose. Después describe la configuración manual, el modo de desarrollo local
+y las funciones principales.
 
-## Estructura del proyecto (resumen)
+## Inicio rápido con Docker Compose
 
-```
-chatbotv2/
-├── actions/                 # (python) server de actions (si aplica)
-├── assets/                  # css, js públicos
-├── controller/              # controladores PHP (ChatController y administración...)
-│   └── helpers/
-│       └── RasaGenerator.php # genera YAML desde DB y llama a Rasa
-├── data/                    # archivos YAML generados / estáticos (nlu, rules, stories)
-├── domain/                  # domain/base.yml + generated.yml generados
-├── model/                   # clases PHP de modelo (Intent, Respuesta, Usuario...)
-├── models/                  # modelos Rasa (.tar.gz) resultantes tras training
-├── scripts/                 # utilidades (run_train.php, fix_sessions.php, etc.)
-├── view/                    # vistas PHP (chat, administración y partials)
-├── config.yml               # pipeline + policies (Rasa)
-├── endpoints.yml            # endpoints de Rasa (action server)
-├── index.php                # bootstrap/front controller PHP
-├── README.md
-└── requirements.txt         # (python) dependencias para scripts de sync/train
-```
+El repositorio incluye un script para Linux que prepara la configuración y
+arranca el stack automáticamente. Incluye la aplicación PHP/Apache, MariaDB,
+Rasa, el servidor de acciones y Ollama.
 
-## Configuración para mover el proyecto
+### Requisitos
 
-La configuración de conexiones está centralizada en `.env`. Copiá `.env.example`
-a `.env` y editá ese archivo para cada instalación:
+- Linux (por ejemplo, CachyOS) o un entorno Linux como WSL2.
+- Docker Engine en ejecución y Docker Compose v2 (`docker compose`).
+- Espacio en disco para las imágenes y para el modelo de Ollama. El modelo
+  predeterminado es `gemma3:1b`; la primera descarga puede tardar.
 
-```bash
-cp .env.example .env
-```
+En Windows, abrí una terminal de WSL2 en la carpeta del proyecto y usá Docker
+Desktop con la integración de WSL habilitada. El script es Bash y no se ejecuta
+directamente desde PowerShell o CMD.
 
-En Windows también podés copiarlo desde el Explorador de archivos. `.env` está
-ignorado por Git para que las contraseñas no se suban al repositorio. La
-aplicación PHP lo carga automáticamente; las variables que ya defina el entorno
-(por ejemplo, Docker Compose) tienen prioridad.
+### Arrancar automáticamente
 
-Configurá `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER` y `DB_PASSWORD` con los datos
-de la base de datos de esa variante. Si PHP y MySQL están en contenedores de la
-misma red de Docker, `DB_HOST` debe ser el nombre del servicio/contenedor MySQL,
-no `localhost`. Importá `chatbot_v2.sql` en esa base. Cada variante puede tener
-su propio `.env` con base y usuario de base de datos diferentes.
-
-`RASA_URL` es la URL base que usa PHP para conversar y solicitar entrenamiento.
-Desde un contenedor, usá el nombre del servicio Rasa accesible en la red Docker.
-Si cada variante requiere un modelo diferente, apuntá cada una a su propia
-instancia Rasa: una instancia compartida tiene un único modelo activo y el
-entrenamiento de una variante puede reemplazar el modelo de las demás.
-
-`OLLAMA_URL` y `OLLAMA_MODEL` configuran la conexión de las acciones
-personalizadas. El contenedor del servidor de acciones también debe recibir
-estas variables de entorno. Para que Rasa alcance ese servidor dentro de
-Docker, usá la dirección de red del servicio de acciones
-(`http://action-server:5055/webhook`). `endpoints.docker.yml` ya está preparada
-para Compose; en una instalación local, `endpoints.yml` conserva
-`http://localhost:5055/webhook`. `localhost` dentro de un contenedor solo se
-refiere a ese mismo contenedor.
-
-Docker Compose lee `.env` para interpolar la configuración y entrega a cada
-contenedor solo las variables que necesita. No publiques los puertos de MySQL o
-Rasa a Internet. Para probar la conexión PHP/MySQL, ejecutá `php test_db.php`
-desde el entorno donde corre PHP.
-
-Notas importantes:
-- El dominio está dividido en `domain/` para que el generador pueda regenerar
-  su parte (`generated.yml`) sin sobrescribir lo definido a mano en `base.yml`.
-- El archivo `config.yml` contiene la configuración de `pipeline` y
-  `policies` usada para entrenar; el generador puede (y debe
-  en el futuro) leerlo dinámicamente.
-
-## Despliegue completo con Docker Compose
-
-El stack de prueba incluye la aplicación PHP/Apache, MariaDB, Rasa, el servidor
-de acciones y Ollama. Docker Compose conecta los servicios en una red privada:
-PHP usa `mysql` y `rasa` como hosts; Rasa usa `action-server`; y las acciones
-usan `ollama`. Solo se publica el puerto HTTP de la aplicación.
-
-### Bootstrap automático para Linux
-
-Este repositorio incluye un script que crea la configuración de `.env` desde
-cero y levanta la pila sin requerir editar valores manuales en cada máquina:
+Desde la raíz del repositorio, ejecutá:
 
 ```bash
 chmod +x scripts/bootstrap_docker.sh
 ./scripts/bootstrap_docker.sh
 ```
 
-Qué hace el script:
+El script:
 
-- genera un `.env` portátil para Linux con valores por defecto seguros;
-- crea contraseñas aleatorias para MariaDB;
-- infiere `LOCAL_GID` del host cuando es posible;
-- fija `APP_BIND_ADDRESS=0.0.0.0` y `APP_PORT=8080` para que funcione en cualquier máquina Linux con Docker;
-- usa nombres de servicio de Docker (`mysql`, `rasa`, `ollama`) en lugar de
-  `localhost` o IPs del host, para que la conexión funcione dentro de la red
-  privada del stack;
-- si Docker está instalado, arranca `docker compose up -d --build`
-  automáticamente.
+1. Crea `.env` si todavía no existe. Genera contraseñas aleatorias para MariaDB
+   y completa los nombres de servicios que Docker usa para conectar los
+   contenedores.
+2. Usa el puerto `8080` y calcula `LOCAL_GID` cuando puede, para facilitar que
+   la aplicación escriba archivos compartidos con el host.
+3. Construye las imágenes y ejecuta `docker compose up -d --build`.
 
-Para generar el archivo `.env` sin levantar contenedores:
+Si `.env` ya existe, el script lo deja intacto; no cambia sus valores ni sus
+contraseñas. Para simular la preparación sin iniciar los servicios:
 
 ```bash
 ./scripts/bootstrap_docker.sh --dry-run
 ```
 
-Y para solo generar la configuración y no iniciar Docker:
+Para generar `.env` sin iniciar Docker:
 
 ```bash
 ./scripts/bootstrap_docker.sh --no-up
 ```
 
-El contenedor de la app monta el repositorio completo en `/var/www/html` y
-instala Git con `git config --global --add safe.directory '*'`. Eso permite
-hacer `git pull` desde dentro del contenedor sin romper permisos ni provocar
-errores por ownership del repositorio, aunque el servidor esté ubicado en otra
-máquina Linux.
+Cuando los servicios estén arriba, revisá su estado y abrí la aplicación:
 
-### Requisitos
+```bash
+docker compose ps
+docker compose logs -f app mysql rasa action-server ollama
+```
 
-- Docker Engine con el complemento **Docker Compose v2** (`docker compose`).
-- Para usar Ollama, suficiente espacio en disco para descargar la imagen y el
-  modelo configurado. El modelo predeterminado `gemma3:1b` se descarga durante
-  el primer inicio; por defecto Ollama usa CPU.
+La aplicación queda en <http://localhost:8080/chatbotv2/>. Para dejar de
+seguir los registros, usá `Ctrl+C`; esto no detiene los contenedores.
 
-Si Docker está instalado pero `docker compose` no existe, instalá el
-complemento Compose v2 siguiendo la
-[guía oficial de Docker](https://docs.docker.com/compose/install/linux/).
-Verificá que tu usuario pueda acceder al daemon (`docker info`). Si no tiene
-acceso, necesitás permisos de administrador para ejecutar Docker con `sudo`
-(por ejemplo, `sudo docker compose up -d --build`) o configurar acceso para tu
-cuenta. Agregar un usuario al grupo `docker` equivale prácticamente a darle
-privilegios de root; utilizá únicamente cuentas de confianza.
+### Acceso y seguridad
 
-El complemento Compose puede instalarse en la cuenta del usuario, pero eso no
-otorga acceso al daemon: un administrador debe configurar ese permiso por
-separado. Si `sudo` informa que tu cuenta no está autorizada, pedile a quien
-administra el servidor que instale el complemento y habilite el acceso de
-Docker.
+El script configura `APP_BIND_ADDRESS=0.0.0.0`, por lo que la aplicación puede
+ser accesible desde otras máquinas de la red. Si solo la vas a usar en esa
+misma computadora, cambiá ese valor en `.env` a `127.0.0.1` antes de iniciar el
+stack. Para permitir acceso desde una red, limitá el acceso con un firewall y
+configurá un proxy inverso con HTTPS antes de compartir el servicio.
 
-### Preparar y arrancar
+No compartas ni subas `.env` a Git: contiene las contraseñas de la base de
+datos. El usuario `root` del sistema operativo no es el usuario `root` de
+MariaDB; son cuentas distintas. Agregar una cuenta al grupo `docker` equivale,
+en la práctica, a darle privilegios de administrador: hacelo solo con cuentas
+de confianza.
 
-Desde la raíz del repositorio:
+### Detener, actualizar y borrar datos
 
-1. Creá la configuración local si todavía no existe:
+```bash
+# Detener los servicios; conservar la base de datos y los modelos de Ollama
+docker compose down
+
+# Reconstruir imágenes y aplicar los cambios del proyecto
+docker compose up -d --build
+
+# Ver los registros de la aplicación
+docker compose logs -f app
+```
+
+MariaDB y Ollama guardan sus datos en volúmenes persistentes. En cambio, los
+modelos de Rasa y los archivos YAML generados se guardan en `models/`, `data/`
+y `domain/` dentro del repositorio. El comando siguiente también elimina los
+volúmenes de MariaDB y Ollama, y borra sus datos permanentemente:
+
+```bash
+docker compose down -v
+```
+
+Usalo únicamente si querés empezar desde cero. El SQL inicializa MariaDB solo
+cuando el volumen está vacío; cambiar las contraseñas en `.env` no actualiza
+las credenciales ni los datos de un volumen existente. La base puede contener
+cuentas de prueba: cambiá sus contraseñas antes de exponer la aplicación a
+otras personas.
+
+## Configuración manual de Docker
+
+Si preferís no usar el script, necesitás Docker Engine y Compose v2. Desde la
+raíz del repositorio:
+
+1. Copiá la plantilla de configuración:
 
    ```bash
    cp .env.example .env
    ```
 
-2. Ejecutá dos veces, por separado, `openssl rand -hex 32` y reemplazá en
-   `.env` los valores de `DB_PASSWORD` y `DB_ROOT_PASSWORD` por los resultados.
-   No uses la contraseña de Linux, no compartas esos valores y no subas `.env`
-   a Git. En Linux, configurá también `LOCAL_GID` con el resultado de `id -g`;
-   así PHP puede guardar los YAML y modelos generados en las carpetas
-   compartidas sin cambiar sus permisos.
-   `APP_PORT` permite cambiar el puerto publicado (por defecto `8080`).
-3. Construí y arrancá todos los servicios:
+2. En `.env`, reemplazá `DB_PASSWORD` y `DB_ROOT_PASSWORD` por contraseñas
+   distintas y difíciles de adivinar. En Linux, configurá `LOCAL_GID` con el
+   resultado de `id -g`. No uses la contraseña de tu cuenta del sistema.
+3. Si la aplicación solo se usará desde esta computadora, configurá
+   `APP_BIND_ADDRESS=127.0.0.1`. `APP_PORT` cambia el puerto publicado; su
+   valor predeterminado es `8080`.
+4. Construí e iniciá el stack:
 
    ```bash
    docker compose up -d --build
    ```
 
-   El primer inicio puede tardar varios minutos: MariaDB importa
-   `chatbot_v2.sql`, Rasa carga el modelo y Ollama descarga
-   `OLLAMA_MODEL`.
-4. Consultá el estado y los registros:
+5. Consultá el estado con `docker compose ps` y abrí
+   <http://localhost:8080/chatbotv2/> (o el puerto indicado en `APP_PORT`).
 
-   ```bash
-   docker compose ps
-   docker compose logs -f app mysql rasa action-server ollama
-   ```
+En el primer inicio, Docker descarga las imágenes; MariaDB importa
+`chatbot_v2.sql` y Ollama descarga el modelo indicado en `OLLAMA_MODEL`. Esto
+puede tardar varios minutos. Si `docker compose` no está disponible, instalá el
+complemento Compose v2 siguiendo la
+[guía oficial de Docker](https://docs.docker.com/compose/install/).
 
-5. Abrí <http://localhost:8080/chatbotv2/> (o el puerto que configuraste en
-   `APP_PORT`). Por seguridad, el puerto se limita a la propia máquina por
-   defecto. Para permitir acceso desde la red, configurá
-   `APP_BIND_ADDRESS=0.0.0.0` en `.env` y protegé el servidor con firewall y un
-   proxy inverso HTTPS antes de usarlo con otras personas.
+## Configuración de la aplicación
 
-El usuario `root` de Linux no interviene en la configuración de los
-contenedores. MariaDB tiene una contraseña de root propia (`DB_ROOT_PASSWORD`)
-y PHP se conecta con el usuario de aplicación (`DB_USER`). El archivo SQL
-inicializa la base únicamente cuando el volumen de MariaDB está vacío; cambiar
-las variables después no modifica las contraseñas o los datos de un volumen ya
-creado. El SQL puede incluir cuentas de prueba de la aplicación: verificá y
-cambiá sus contraseñas antes de poner el sitio en una red compartida.
+La configuración local se guarda en `.env`, que está excluido de Git. La
+aplicación PHP carga esas variables; si Docker Compose define una variable para
+un contenedor, esa configuración tiene prioridad dentro de él.
 
-### Operaciones habituales
+Las variables principales son:
 
-```bash
-# Seguir los registros de un servicio
-docker compose logs -f app
+| Variable | Uso |
+| --- | --- |
+| `APP_BIND_ADDRESS` | Interfaz del host en la que se publica la aplicación. |
+| `APP_PORT` | Puerto HTTP publicado por Docker. |
+| `DB_HOST`, `DB_PORT` | Host y puerto de MariaDB. En Compose, el host es `mysql`. |
+| `DB_NAME`, `DB_USER`, `DB_PASSWORD` | Base, usuario y contraseña de la aplicación. |
+| `DB_ROOT_PASSWORD` | Contraseña propia de la cuenta root de MariaDB. |
+| `RASA_URL` | URL base de la API de Rasa. En Compose es `http://rasa:5005`. |
+| `OLLAMA_URL`, `OLLAMA_MODEL` | API y modelo que utilizan las acciones personalizadas. |
 
-# Detener los servicios sin borrar la base ni el modelo de Ollama
-docker compose down
+Dentro de una red de Docker, usá nombres de servicios como `mysql`, `rasa`,
+`action-server` y `ollama`, no `localhost`. En un contenedor, `localhost`
+apunta a ese mismo contenedor, no al host ni a los otros servicios.
 
-# Reconstruir y aplicar cambios al código
-docker compose up -d --build
+El Compose de este repositorio no publica al host los puertos de MariaDB, Rasa,
+Ollama ni del servidor de acciones; solo publica el HTTP de la aplicación.
+`endpoints.docker.yml` apunta al servidor de acciones dentro de la red de
+Compose. Para ejecutar Rasa localmente, `endpoints.yml` usa
+`http://localhost:5055/webhook`.
 
-# Entrenar Rasa con los YAML del repositorio
-docker compose run --rm rasa train --domain domain/ --out /models
-docker compose restart rasa
-```
+## Ejecución local de Rasa y acciones
 
-Los datos de MariaDB y los modelos descargados de Ollama se guardan en
-volúmenes persistentes; el modelo Rasa, junto con los YAML generados por PHP,
-queda en `models/`, `data/` y `domain/` en el repositorio.
-`docker compose down -v` elimina permanentemente los volúmenes de MariaDB y
-Ollama: usalo solo si querés borrar esos datos y empezar de cero.
-
-`endpoints.docker.yml` configura la dirección interna del action server y no
-reemplaza `endpoints.yml`, que continúa disponible para el uso local descripto
-arriba. El puerto de Rasa, MariaDB y Ollama no se publica al host. Para un
-servidor accesible desde Internet, agregá un proxy inverso con HTTPS y
-restricciones de acceso antes de publicar la aplicación; este Compose está
-pensado para pruebas y no configura TLS ni copias de seguridad.
-
-## Flujo de reentrenado (server-side)
-
-- `controller/helpers/RasaGenerator.php::trainAndLoadModel()` genera los archivos
-  y solicita el reentrenamiento a Rasa.
-- `RasaGenerator` genera en memoria un YAML combinado y lo POSTea a
-  `${RASA_URL}/model/train` con `Content-Type: text/yaml`.
-- Si Rasa devuelve JSON con la ruta del modelo, se hace `PUT /model` con
-  `{"model_file": "<ruta>"}`. Si devuelve el `.tar.gz` binario, el
-  generador lo guarda localmente (en `models/` o en `/tmp`) y hace `PUT` con
-  la ruta al archivo guardado.
-
-Comando rápido para probar desde la línea de comandos (en la máquina donde
-está corriendo Apache/PHP):
+Este modo sirve para desarrollo sin usar todo el stack de Docker. El proyecto
+usa Rasa 3.6.21 y Python 3.10. Con Python 3.10 disponible, desde la raíz del
+repositorio:
 
 ```bash
-php scripts/run_train.php
-```
-
-El script de entrenamiento devuelve objetos JSON con la fase y el error cuando
-algo falla.
-
-## Cómo levantar Rasa / acciones (resumen)
-
-1. Crear y activar entorno virtual Python
-Este proyecto utiliza Python 3.10, por lo que hay que conseguir dicha version vieja.
-Para ello vamos a utilizar uv:
-```bash
-# Descargamos uv
-curl -LsSf https://astral.sh/uv/install.sh | sh
-
-# Creamos un entorno virtual con python 3.10
-uv venv --python 3.10
-
-# Instalamos Rasa
+python3.10 -m venv venv
 source venv/bin/activate
-pip install rasa
+pip install -r requirements.txt
 ```
 
-2. Entrenar Rasa (si trabajás localmente con los YAML en `domain/` y `data/`):
-
-```bash
-rasa train --domain domain/
-```
-
-3. Levantar action server (si usás acciones personalizadas):
+En Windows, la activación del entorno virtual se hace con
+`venv\Scripts\activate` en CMD o `venv\Scripts\Activate.ps1` en PowerShell.
+Luego, en terminales separadas y con el entorno activado, iniciá el servidor de
+acciones y Rasa:
 
 ```bash
 rasa run actions
 ```
 
-4. Levantar Rasa API para que se registre correctamente:
-
 ```bash
 rasa run --enable-api --cors "*" --domain domain/
 ```
 
-## Problemas y recomendaciones
+Antes de iniciar Rasa por primera vez, entrená el modelo:
 
-- Si ves `Encountered empty domain during validation`, asegurate de pasar
-  `--domain domain/` al comando `rasa` porque el repositorio tiene el dominio
-  dividido en varios ficheros.
-- Si la web devuelve un 500 sin cuerpo, revisá los logs de Apache y el
-  `RasaGenerator` (ahora devuelve objetos JSON con `phase` y `error` para
-  facilitar el debugging).
-- Para producción: no uses `--cors "*"`; configura rutas seguras y ajusta
-  permisos del directorio `models/` si querés que la app web guarde modelos
-  entrenados ahí.
+```bash
+rasa train --domain domain/
+```
 
-EPET N°3 7°I
+La opción `--cors "*"` es solo para desarrollo. No la uses en producción; en
+ese caso restringí los orígenes permitidos y protegé el acceso a la API.
 
-## Verificación en dos pasos
+Para probar la conexión PHP con la base de datos desde el entorno donde corre
+PHP, ejecutá:
 
-La aplicación permite proteger cuentas con códigos TOTP de Google Authenticator y aplicaciones compatibles. La guía de [instalación, archivos involucrados y flujo completo](docs/authenticator-2fa.md) explica también cómo actualizar una base existente. El esquema para nuevas instalaciones está en `chatbot_v2.sql`.
+```bash
+php test_db.php
+```
 
-## Funcionalidad de voz del chatbot
+## Entrenamiento y actualización del modelo
 
-La interfaz del chat incorpora entrada y salida de voz como alternativas accesibles al uso tradicional del teclado. La respuesta escrita siempre permanece visible y el envío de consultas continúa utilizando el formulario existente.
+En el flujo de la aplicación, `controller/helpers/RasaGenerator.php`
+construye el YAML combinado de entrenamiento con los datos de la base y lo
+envía a `${RASA_URL}/model/train`. Cuando Rasa devuelve un modelo, la
+aplicación lo guarda localmente y solicita a Rasa que lo cargue.
 
-### Tecnologías utilizadas
+Para iniciar el entrenamiento desde PHP:
 
-- **Reconocimiento de voz a texto:** `SpeechRecognition`, con `webkitSpeechRecognition` como compatibilidad para navegadores que exponen la API con prefijo. Es una API nativa de la **Web Speech API**: [documentación de MDN sobre SpeechRecognition](https://developer.mozilla.org/en-US/docs/Web/API/SpeechRecognition).
-- **Conversión de texto a voz:** `SpeechSynthesis` y `SpeechSynthesisUtterance`, también parte de la **Web Speech API**: [documentación de MDN sobre SpeechSynthesis](https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesis).
+```bash
+php scripts/run_train.php
+```
 
-No se utilizó una librería externa. Se eligieron APIs propias del navegador porque la aplicación ya funciona con PHP y JavaScript del lado del cliente, no utiliza un bundler frontend y estas APIs permiten incorporar la mejora sin agregar dependencias ni modificar el contrato del backend. El texto dictado se envía al mismo controlador que una consulta escrita.
+El script devuelve JSON con la fase y el error si falla. En Docker también
+podés entrenar directamente con los YAML del repositorio:
 
-### Funcionamiento
+```bash
+docker compose run --rm rasa train --domain domain/ --out /models
+docker compose restart rasa
+```
 
-- El botón **Micrófono** solicita permiso al navegador al iniciar el reconocimiento. El texto reconocido se coloca en el campo de consulta, donde puede revisarse o corregirse antes de enviarlo con el botón habitual o con Enter.
-- Mientras el reconocimiento está activo, el botón cambia a **Detener micrófono**, queda marcado con `aria-pressed="true"` y se muestra el estado “Escuchando”.
-- Cada respuesta de A.U.R.A conserva un botón circular con el icono de volumen. La lectura comienza al pulsarlo y el mismo botón la detiene mientras está activa; iniciar otra respuesta cancela la lectura anterior.
-- Si el navegador no ofrece reconocimiento de voz o el permiso es rechazado, se informa el motivo y el chat continúa funcionando mediante teclado. Si no existe síntesis de voz, la respuesta escrita sigue disponible.
+El directorio `domain/` separa `base.yml`, mantenido manualmente, de
+`generated.yml`, que puede regenerar la aplicación. `data/` contiene datos de
+entrenamiento y `models/` los modelos resultantes.
 
-### Compatibilidad y accesibilidad
+## Estructura del proyecto
 
-El soporte de `SpeechRecognition` no es uniforme entre navegadores y suele estar disponible con mayor frecuencia en Chrome y navegadores basados en Chromium; puede requerir `webkitSpeechRecognition`. Además, el micrófono normalmente necesita permiso explícito y un contexto seguro como HTTPS o `localhost`. `SpeechSynthesis` tiene una disponibilidad más amplia, aunque las voces instaladas dependen del sistema operativo y del navegador.
+```text
+actions/                 Acciones personalizadas de Rasa
+assets/                  CSS y JavaScript del navegador
+controller/              Controladores PHP y lógica de la aplicación
+controller/helpers/      Integración y generación de datos para Rasa
+data/                    Datos YAML de entrenamiento
+domain/                  Dominio de Rasa, incluido el generado
+model/                   Clases de datos PHP
+models/                  Modelos entrenados de Rasa
+scripts/                 Utilidades y tareas de entrenamiento
+view/                    Vistas PHP
+config.yml               Pipeline y políticas de Rasa
+endpoints.yml             Endpoints para Rasa local
+endpoints.docker.yml      Endpoint del action server en Docker
+index.php                 Punto de entrada de la aplicación web
+chatbot_v2.sql            Esquema y datos iniciales de la base de datos
+```
 
-La funcionalidad degrada de forma progresiva: la ausencia de reconocimiento, un error del servicio o el rechazo del permiso no bloquean el ingreso manual ni el envío tradicional. Los controles tienen texto visible, etiquetas ARIA, estados anunciados mediante `role="status"` y foco de teclado. Esto facilita la interacción a personas con dificultades motoras, cansancio visual o necesidad de usar la voz para introducir texto, sin retirar la alternativa escrita ni ocultar las respuestas a lectores de pantalla.
+## Funcionalidades
+
+### Verificación en dos pasos
+
+La aplicación permite proteger cuentas con códigos TOTP de Google
+Authenticator y aplicaciones compatibles. La guía de
+[configuración de la verificación en dos pasos](docs/authenticator-2fa.md)
+describe la instalación, los archivos involucrados y la actualización de una
+base existente. El esquema para instalaciones nuevas está en `chatbot_v2.sql`.
+
+### Entrada y salida de voz
+
+El chat ofrece reconocimiento de voz para ingresar consultas y síntesis de voz
+para escuchar las respuestas. El texto reconocido aparece en el campo de
+consulta para poder corregirlo antes de enviarlo; la respuesta escrita siempre
+permanece visible.
+
+Estas funciones usan las API nativas del navegador: `SpeechRecognition` (o
+`webkitSpeechRecognition` en navegadores que exponen esa variante) y
+`SpeechSynthesis`. El reconocimiento suele tener mejor soporte en Chrome y
+navegadores basados en Chromium, requiere permiso para usar el micrófono y
+normalmente necesita HTTPS o `localhost`. Las voces disponibles dependen del
+navegador y del sistema operativo.
+
+Si el reconocimiento de voz no está disponible, falla o se deniega el permiso,
+se puede seguir usando el teclado. Si no está disponible la síntesis, las
+respuestas escritas siguen funcionando.
+
+## Solución de problemas
+
+- **`Encountered empty domain during validation`:** indicá `--domain domain/`;
+  el dominio del proyecto está repartido en varios archivos.
+- **La web muestra un error 500:** revisá los registros de Apache y ejecutá
+  `php scripts/run_train.php` para ver la fase y el error del entrenamiento.
+- **PHP no conecta con MariaDB en Docker:** comprobá que `DB_HOST` sea `mysql`,
+  que los servicios estén saludables (`docker compose ps`) y que las
+  credenciales de `.env` correspondan al volumen existente.
+- **Rasa no conecta con las acciones:** en Docker, verificá
+  `endpoints.docker.yml` y que `action-server` esté saludable. En modo local,
+  verificá que el servidor de acciones esté en ejecución y que se use
+  `endpoints.yml`.
+- **El micrófono no funciona:** comprobá el permiso del navegador y que la
+  página use HTTPS o `localhost`; también podés continuar escribiendo.
+
+Para producción, configurá HTTPS, limitá el acceso a las API internas, usá
+orígenes CORS específicos y prepará copias de seguridad. El Compose incluido
+está pensado para desarrollo y pruebas; no configura TLS ni respaldos.

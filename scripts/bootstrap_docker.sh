@@ -126,23 +126,25 @@ if [[ "$DRY_RUN" -eq 1 ]]; then
   exit 0
 fi
 
-if command -v docker >/dev/null 2>&1; then
-  if docker compose version >/dev/null 2>&1; then
-    echo "Starting Docker stack..."
-    (cd "$PROJECT_ROOT" && docker compose up -d --build)
-  elif command -v docker-compose >/dev/null 2>&1; then
-    echo "Starting Docker stack with docker-compose..."
-    (cd "$PROJECT_ROOT" && docker-compose up -d --build)
+if [[ "$DOCKER_UP" -eq 1 ]]; then
+  if command -v docker >/dev/null 2>&1; then
+    if docker compose version >/dev/null 2>&1; then
+      echo "Starting Docker stack..."
+      (cd "$PROJECT_ROOT" && docker compose up -d --build)
+    elif command -v docker-compose >/dev/null 2>&1; then
+      echo "Starting Docker stack with docker-compose..."
+      (cd "$PROJECT_ROOT" && docker-compose up -d --build)
+    else
+      echo "Docker is installed but neither 'docker compose' nor 'docker-compose' is available." >&2
+      exit 1
+    fi
   else
-    echo "Docker is installed but neither 'docker compose' nor 'docker-compose' is available." >&2
+    echo "Docker was not found in PATH. Install Docker Engine and re-run this script." >&2
     exit 1
   fi
-else
-  echo "Docker was not found in PATH. Install Docker Engine and re-run this script." >&2
-  exit 1
-fi
 
-if [[ "$DOCKER_UP" -eq 1 ]]; then
   echo "Docker stack bootstrapped successfully."
   echo "Open http://localhost:${APP_PORT:-8080}"
+else
+  echo "Configuration generated; Docker was not started."
 fi
