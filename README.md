@@ -18,7 +18,8 @@ Rasa, el servidor de acciones y Ollama.
 ### Requisitos
 
 - Linux (por ejemplo, CachyOS) o un entorno Linux como WSL2.
-- Docker Engine en ejecución y Docker Compose v2 (`docker compose`).
+- En Ubuntu y Linux Mint, el script instala Docker Engine y Compose si faltan;
+  en otras distribuciones, instalalos antes de ejecutar el script.
 - Espacio en disco para las imágenes y para el modelo de Ollama. El modelo
   predeterminado es `gemma3:1b`; la primera descarga puede tardar.
 
@@ -35,17 +36,32 @@ chmod +x scripts/bootstrap_docker.sh
 ./scripts/bootstrap_docker.sh
 ```
 
+El script no se puede usar por sí solo: necesita el resto del repositorio,
+incluidos `docker-compose.yml`, los Dockerfiles y el código de la aplicación.
+No necesitás Git: podés descargar el [ZIP de la rama `main`](https://github.com/SantidomKO/chatbotv2/archive/refs/heads/main.zip),
+extraerlo en Linux y ejecutar el script desde la carpeta `chatbotv2-main`.
+Si el repositorio es privado, iniciá sesión en GitHub con una cuenta que tenga
+acceso para descargarlo. También podés clonar o descargar el proyecto completo
+de otra forma; en todos los casos, ejecutalo desde la raíz del proyecto.
+
+En Ubuntu y Linux Mint, si hace falta instalar Docker, el script usa `sudo` y
+te pide la contraseña en la terminal. También habilita e inicia el servicio de
+Docker. Si Docker ya está disponible, no lo reinstala.
+
 El script:
 
-1. Crea `.env` si todavía no existe. Genera contraseñas aleatorias para MariaDB
-   y completa los nombres de servicios que Docker usa para conectar los
+1. Crea `.env` si todavía no existe y solicita las contraseñas de MariaDB en la
+   terminal. Si no puede pedirlas interactivamente, genera contraseñas aleatorias.
+   Completa también los nombres de servicios que Docker usa para conectar los
    contenedores.
 2. Usa el puerto `8080` y calcula `LOCAL_GID` cuando puede, para facilitar que
    la aplicación escriba archivos compartidos con el host.
-3. Construye las imágenes y ejecuta `docker compose up -d --build`.
+3. Comprueba que Docker esté disponible, construye las imágenes y ejecuta
+   `docker compose up -d --build`.
 
 Si `.env` ya existe, el script lo deja intacto; no cambia sus valores ni sus
-contraseñas. Para simular la preparación sin iniciar los servicios:
+contraseñas. `--dry-run` prepara `.env` si hace falta, pero no inicia los
+servicios:
 
 ```bash
 ./scripts/bootstrap_docker.sh --dry-run
@@ -63,6 +79,10 @@ Cuando los servicios estén arriba, revisá su estado y abrí la aplicación:
 docker compose ps
 docker compose logs -f app mysql rasa action-server ollama
 ```
+
+Si tu usuario no tiene permiso para usar Docker directamente, anteponé `sudo`
+a esos comandos. Agregarlo al grupo `docker` evita usar `sudo`, pero equivale
+prácticamente a darle privilegios de administrador.
 
 La aplicación queda en <http://localhost:8080/chatbotv2/>. Para dejar de
 seguir los registros, usá `Ctrl+C`; esto no detiene los contenedores.
