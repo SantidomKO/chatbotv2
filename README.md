@@ -314,15 +314,26 @@ respuestas escritas siguen funcionando.
   credenciales de `.env` correspondan al volumen existente.
 - **Se interrumpe o parece trabarse una descarga de Ollama:** `ollama/ollama`
   es la imagen Docker; `gemma3:1b` es el modelo que Ollama descarga después.
-  Podés volver a ejecutar `docker compose up -d --build`: Docker reutiliza las
-  capas ya descargadas y Ollama conserva el modelo en el volumen `ollama-data`.
+  Si se interrumpe la descarga del modelo, podés volver a ejecutar
+  `docker compose up -d --build`. Docker reutiliza las capas completas de la
+  imagen y el modelo usa el volumen `ollama-data`, pero Ollama puede reiniciar
+  desde cero el archivo que estaba descargando; no se garantiza que retome el
+  porcentaje exacto.
+  Si se interrumpió el script de bootstrap, volvé a ejecutar
+  `./scripts/bootstrap_docker.sh` desde la raíz del proyecto; Docker ya
+  instalado no se reinstala.
   Para ver el progreso del modelo, usá `docker compose logs -f ollama-model`;
-  `Ctrl+C` en ese comando solo deja de mostrar los registros. No uses
+  `Ctrl+C` mientras ejecutás ese comando solo deja de mostrar los registros,
+  pero `Ctrl+C` durante el bootstrap sí puede interrumpir la descarga. No uses
   `docker compose down -v` para reintentar, porque también borra los volúmenes.
 - **Rasa no conecta con las acciones:** en Docker, verificá
   `endpoints.docker.yml` y que `action-server` esté saludable. En modo local,
   verificá que el servidor de acciones esté en ejecución y que se use
   `endpoints.yml`.
+- **Rasa queda `unhealthy` con `invalid choice: '0.0.0.0'`:** Rasa 3.6 usa
+  `--interface` para la dirección de escucha, no `--host`. Después de actualizar
+  la configuración, reconstruí y levantá los servicios con
+  `docker compose up -d --build`.
 - **El micrófono no funciona:** comprobá el permiso del navegador y que la
   página use HTTPS o `localhost`; también podés continuar escribiendo.
 

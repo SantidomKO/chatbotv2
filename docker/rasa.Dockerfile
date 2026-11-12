@@ -13,4 +13,4 @@ COPY data/ ./data/
 COPY models/ /models/
 
 ENTRYPOINT ["rasa"]
-CMD ["run", "--enable-api", "--host", "0.0.0.0", "--port", "5005", "--model", "/models", "--endpoints", "endpoints.docker.yml"]
+CMD ["run", "--enable-api", "--interface", "0.0.0.0", "--port", "5005", "--model", "/models", "--endpoints", "endpoints.docker.yml"]
