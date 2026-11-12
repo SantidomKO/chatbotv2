@@ -65,7 +65,7 @@ prompt_password() {
 
   if [[ -t 0 ]]; then
     read -r -s -p "$label: " value
-    echo
+    echo >&2
     if [[ -n "$value" ]]; then
       printf '%s' "$value"
       return 0
