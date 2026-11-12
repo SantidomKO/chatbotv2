@@ -58,6 +58,24 @@ PY
   fi
 }
 
+prompt_password() {
+  local label="$1"
+  local value=""
+
+  if [[ -t 0 ]]; then
+    read -r -s -p "$label: " value
+    echo
+    if [[ -n "$value" ]]; then
+      printf '%s' "$value"
+      return 0
+    fi
+  fi
+
+  echo "$label" >&2
+  echo "No password was provided; generating a secure random value instead." >&2
+  random_password
+}
+
 APP_PORT="8080"
 APP_BIND_ADDRESS="0.0.0.0"
 LOCAL_GID="1000"
@@ -69,14 +87,18 @@ DB_HOST="mysql"
 DB_PORT="3306"
 DB_NAME="chatbot_v2"
 DB_USER="chatbot_app"
-DB_PASSWORD="$(random_password)"
-DB_ROOT_PASSWORD="$(random_password)"
+DB_PASSWORD=""
+DB_ROOT_PASSWORD=""
 RASA_URL="http://rasa:5005"
 OLLAMA_URL="http://ollama:11434/api/chat"
 OLLAMA_MODEL="gemma3:1b"
 DEBUG_2FA_CODE="false"
 
 if [[ ! -f "$ENV_FILE" ]]; then
+  echo "Ingresá las contraseñas para MariaDB."
+  DB_PASSWORD="$(prompt_password "DB_PASSWORD")"
+  DB_ROOT_PASSWORD="$(prompt_password "DB_ROOT_PASSWORD")"
+
   cat > "$ENV_FILE" <<EOF
 APP_PORT=${APP_PORT}
 APP_BIND_ADDRESS=${APP_BIND_ADDRESS}
