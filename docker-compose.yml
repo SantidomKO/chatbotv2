@@ -110,7 +110,7 @@ services:
       DB_NAME: ${DB_NAME:-chatbot_v2}
       DB_USER: ${DB_USER:-chatbot_app}
       DB_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in .env}
-      RASA_URL: http://rasa:5005
+      RASA_URL: ${RASA_URL:-http://rasa:5005}
     volumes:
       - .:/var/www/html
       - ./models:/models
