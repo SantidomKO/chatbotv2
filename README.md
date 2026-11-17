@@ -5,157 +5,52 @@ con Rasa. La web construye los datos de entrenamiento a partir de la base de
 datos, solicita a Rasa que entrene un modelo y, si el entrenamiento termina
 bien, le pide que cargue el modelo nuevo.
 
-Esta guía cubre primero la forma recomendada de probar el proyecto con Docker
-Compose. Después describe la configuración manual, el modo de desarrollo local
-y las funciones principales.
+Esta guía cubre Docker Compose, la configuración manual y las funciones principales.
 
 ## Inicio rápido con Docker Compose
 
-El repositorio incluye un script para Linux que prepara la configuración y
-arranca el stack automáticamente. Incluye la aplicación PHP/Apache, MariaDB,
-Rasa, el servidor de acciones y Ollama.
+Docker Compose levanta la aplicación PHP/Apache, MariaDB, Rasa, el servidor de acciones y Ollama.
 
 ### Requisitos
 
-- Linux (por ejemplo, CachyOS) o un entorno Linux como WSL2.
-- En Ubuntu y Linux Mint, el script instala Docker Engine y Compose si faltan;
-  en otras distribuciones, instalalos antes de ejecutar el script.
+- Docker Engine y Docker Compose v2.
 - Espacio en disco para las imágenes y para el modelo de Ollama. El modelo
   predeterminado es `gemma3:1b`; la primera descarga puede tardar.
+- En Windows, Docker Desktop con integración de contenedores habilitada.
 
-En Windows, abrí una terminal de WSL2 en la carpeta del proyecto y usá Docker
-Desktop con la integración de WSL habilitada. El script es Bash y no se ejecuta
-directamente desde PowerShell o CMD.
+### Arrancar el stack
 
-### Arrancar automáticamente
-
-Desde la raíz del repositorio, ejecutá:
+Desde la raíz del repositorio, creá `.env` con las variables de MaríaDB y ejecutá:
 
 ```bash
-chmod +x scripts/bootstrap_docker.sh
-./scripts/bootstrap_docker.sh
+docker compose up -d --build
 ```
 
-El script no se puede usar por sí solo: necesita el resto del repositorio,
-incluidos `docker-compose.yml`, los Dockerfiles y el código de la aplicación.
-No necesitás Git: podés descargar el [ZIP de la rama `main`](https://github.com/SantidomKO/chatbotv2/archive/refs/heads/main.zip),
-extraerlo en Linux y ejecutar el script desde la carpeta `chatbotv2-main`.
-Si el repositorio es privado, iniciá sesión en GitHub con una cuenta que tenga
-acceso para descargarlo. También podés clonar o descargar el proyecto completo
-de otra forma; en todos los casos, ejecutalo desde la raíz del proyecto.
-
-En Ubuntu y Linux Mint, si hace falta instalar Docker, el script usa `sudo` y
-te pide la contraseña en la terminal. También habilita e inicia el servicio de
-Docker. Si Docker ya está disponible, no lo reinstala.
-
-El script:
-
-1. Crea `.env` si todavía no existe y solicita las contraseñas de MariaDB en la
-   terminal. Si no puede pedirlas interactivamente, genera contraseñas aleatorias.
-   Completa también los nombres de servicios que Docker usa para conectar los
-   contenedores.
-2. Usa el puerto `8080` y calcula `LOCAL_GID` cuando puede, para facilitar que
-   la aplicación escriba archivos compartidos con el host.
-3. Compara los archivos de entrenamiento con la última marca local y entrena
-   Rasa si el modelo falta o los datos cambiaron. El primer entrenamiento puede
-   tardar varios minutos.
-4. Comprueba que Docker esté disponible, construye las imágenes y ejecuta
-   `docker compose up -d --build`.
-
-Si `.env` ya existe, el script lo deja intacto; no cambia sus valores ni sus
-contraseñas. `--dry-run` prepara `.env` si hace falta, pero no inicia los
-servicios:
-
-```bash
-./scripts/bootstrap_docker.sh --dry-run
-```
-
-Para generar `.env` sin iniciar Docker:
-
-```bash
-./scripts/bootstrap_docker.sh --no-up
-```
-
-Cuando los servicios estén arriba, revisá su estado y abrí la aplicación:
+Consultá el estado y abrí la aplicación:
 
 ```bash
 docker compose ps
 docker compose logs -f app mysql rasa action-server ollama
 ```
 
-Si tu usuario no tiene permiso para usar Docker directamente, anteponé `sudo`
-a esos comandos. Agregarlo al grupo `docker` evita usar `sudo`, pero equivale
-prácticamente a darle privilegios de administrador.
-
-La aplicación queda en <http://localhost:8080/chatbotv2/>. Para dejar de
-seguir los registros, usá `Ctrl+C`; esto no detiene los contenedores.
-
-### Acceso y seguridad
-
-El script configura `APP_BIND_ADDRESS=0.0.0.0`, por lo que la aplicación puede
-ser accesible desde otras máquinas de la red. Si solo la vas a usar en esa
-misma computadora, cambiá ese valor en `.env` a `127.0.0.1` antes de iniciar el
-stack. Para permitir acceso desde una red, limitá el acceso con un firewall y
-configurá un proxy inverso con HTTPS antes de compartir el servicio.
-
-No compartas ni subas `.env` a Git: contiene las contraseñas de la base de
-datos. El usuario `root` del sistema operativo no es el usuario `root` de
-MariaDB; son cuentas distintas. Agregar una cuenta al grupo `docker` equivale,
-en la práctica, a darle privilegios de administrador: hacelo solo con cuentas
-de confianza.
-
-### Detener, actualizar y borrar datos
-
-```bash
-# Detener los servicios; conservar la base de datos y los modelos de Ollama
-docker compose down
-
-# Reconstruir imágenes y aplicar los cambios del proyecto
-docker compose up -d --build
-
-# Ver los registros de la aplicación
-docker compose logs -f app
-```
-
-MariaDB y Ollama guardan sus datos en volúmenes persistentes. En cambio, los
-modelos de Rasa y los archivos YAML generados se guardan en `models/`, `data/`
-y `domain/` dentro del repositorio. El comando siguiente también elimina los
-volúmenes de MariaDB y Ollama, y borra sus datos permanentemente:
-
-```bash
-docker compose down -v
-```
-
-Usalo únicamente si querés empezar desde cero. El SQL inicializa MariaDB solo
-cuando el volumen está vacío; cambiar las contraseñas en `.env` no actualiza
-las credenciales ni los datos de un volumen existente. La base puede contener
-cuentas de prueba: cambiá sus contraseñas antes de exponer la aplicación a
-otras personas.
+La aplicación queda en <http://localhost:8080/chatbotv2/>.
 
 ## Configuración manual de Docker
 
-Si preferís no usar el script, necesitás Docker Engine y Compose v2. Desde la
-raíz del repositorio:
+Necesitás Docker Engine y Compose v2. Desde la raíz del repositorio:
 
-1. Copiá la plantilla de configuración:
-
-   ```bash
-   cp .env.example .env
-   ```
-
-2. En `.env`, reemplazá `DB_PASSWORD` y `DB_ROOT_PASSWORD` por contraseñas
-   distintas y difíciles de adivinar. En Linux, configurá `LOCAL_GID` con el
-   resultado de `id -g`. No uses la contraseña de tu cuenta del sistema.
-3. Si la aplicación solo se usará desde esta computadora, configurá
+1. Creá `.env` con `DB_PASSWORD`, `DB_ROOT_PASSWORD` y las demás variables
+   necesarias. Usá contraseñas distintas y difíciles de adivinar.
+2. Si la aplicación solo se usará desde esta computadora, configurá
    `APP_BIND_ADDRESS=127.0.0.1`. `APP_PORT` cambia el puerto publicado; su
    valor predeterminado es `8080`.
-4. Construí e iniciá el stack:
+3. Construí e iniciá el stack:
 
    ```bash
    docker compose up -d --build
    ```
 
-5. Consultá el estado con `docker compose ps` y abrí
+4. Consultá el estado con `docker compose ps` y abrí
    <http://localhost:8080/chatbotv2/> (o el puerto indicado en `APP_PORT`).
 
 En el primer inicio, Docker descarga las imágenes; MariaDB importa
@@ -322,13 +217,7 @@ respuestas escritas siguen funcionando.
   imagen y el modelo usa el volumen `ollama-data`, pero Ollama puede reiniciar
   desde cero el archivo que estaba descargando; no se garantiza que retome el
   porcentaje exacto.
-  Si se interrumpió el script de bootstrap, volvé a ejecutar
-  `./scripts/bootstrap_docker.sh` desde la raíz del proyecto; Docker ya
-  instalado no se reinstala.
-  Para ver el progreso del modelo, usá `docker compose logs -f ollama-model`;
-  `Ctrl+C` mientras ejecutás ese comando solo deja de mostrar los registros,
-  pero `Ctrl+C` durante el bootstrap sí puede interrumpir la descarga. No uses
-  `docker compose down -v` para reintentar, porque también borra los volúmenes.
+  Para ver el progreso del modelo, usá `docker compose logs -f ollama-model`.
 - **Rasa no conecta con las acciones:** en Docker, verificá
   `endpoints.docker.yml` y que `action-server` esté saludable. En modo local,
   verificá que el servidor de acciones esté en ejecución y que se use
