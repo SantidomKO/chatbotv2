@@ -61,9 +61,12 @@ class Authenticator
 
     public function isEnabled($userId)
     {
-        $stmt = $this->conexion->prepare('SELECT two_factor_enabled FROM usuarios WHERE id_usuario = ?');
+        $stmt = $this->conexion->prepare(
+            'SELECT two_factor_enabled, two_factor_secret FROM usuarios WHERE id_usuario = ?'
+        );
         $stmt->execute([$userId]);
-        return (bool) $stmt->fetchColumn();
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $row && (int) $row['two_factor_enabled'] === 1 && !empty($row['two_factor_secret']);
     }
 
     public function verifyAndConsume($userId, $code)
@@ -92,19 +95,23 @@ class Authenticator
 
     public function enable($userId, $secret, $counter)
     {
-
+        $encryptedSecret = $this->encryptSecret($secret);
         $stmt = $this->conexion->prepare(
-            "UPDATE usuarios SET two_factor_secret = ?, two_factor_enabled = 1, two_factor_last_counter = ?, two_factor_method = 'authenticator' WHERE id_usuario = ?"
+            "UPDATE usuarios
+            SET two_factor_secret = ?, two_factor_enabled = 1,
+                two_factor_last_counter = ?, two_factor_method = 'authenticator'
+            WHERE id_usuario = ?"
         );
-
         return $stmt->execute([$encryptedSecret, $counter, $userId]);
     }
 
     public function disable($userId)
     {
-
         $stmt = $this->conexion->prepare(
-            "UPDATE usuarios SET two_factor_secret = NULL, two_factor_enabled = 0, two_factor_last_counter = NULL, two_factor_method = 'none' WHERE id_usuario = ?"
+            "UPDATE usuarios
+            SET two_factor_secret = NULL, two_factor_enabled = 0,
+                two_factor_last_counter = NULL, two_factor_method = 'none'
+            WHERE id_usuario = ?"
         );
         return $stmt->execute([$userId]);
     }

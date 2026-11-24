@@ -249,14 +249,14 @@ class AuthController
     private function resolverMetodo2FA($usuario): string
     {
         $authenticator = new Authenticator();
+        if ($authenticator->isEnabled($usuario->getId())) {
+            return 'authenticator';
+        }
 
         if (!Usuario::estaVerificado($usuario->getId())) {
             return 'email';
         }
 
-        if ($authenticator->isEnabled($usuario->getId())) {
-            return 'authenticator';
-        }
 
         $metodoUsuario = Usuario::obtenerMetodo2FA($usuario->getId());
 
