@@ -92,17 +92,19 @@ class Authenticator
 
     public function enable($userId, $secret, $counter)
     {
-        $encryptedSecret = $this->encryptSecret($secret);
+
         $stmt = $this->conexion->prepare(
-            'UPDATE usuarios SET two_factor_secret = ?, two_factor_enabled = 1, two_factor_last_counter = ? WHERE id_usuario = ?'
+            "UPDATE usuarios SET two_factor_secret = ?, two_factor_enabled = 1, two_factor_last_counter = ?, two_factor_method = 'authenticator' WHERE id_usuario = ?"
         );
+
         return $stmt->execute([$encryptedSecret, $counter, $userId]);
     }
 
     public function disable($userId)
     {
+
         $stmt = $this->conexion->prepare(
-            'UPDATE usuarios SET two_factor_secret = NULL, two_factor_enabled = 0, two_factor_last_counter = NULL WHERE id_usuario = ?'
+            "UPDATE usuarios SET two_factor_secret = NULL, two_factor_enabled = 0, two_factor_last_counter = NULL, two_factor_method = 'none' WHERE id_usuario = ?"
         );
         return $stmt->execute([$userId]);
     }

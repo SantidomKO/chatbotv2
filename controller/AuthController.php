@@ -254,6 +254,10 @@ class AuthController
             return 'email';
         }
 
+        if ($authenticator->isEnabled($usuario->getId())) {
+            return 'authenticator';
+        }
+
         $metodoUsuario = Usuario::obtenerMetodo2FA($usuario->getId());
 
         if (!Usuario::requiere2FA($usuario)) {
