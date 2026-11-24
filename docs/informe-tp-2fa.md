@@ -121,7 +121,8 @@ La tabla `usuarios`, definida en [chatbot_v2.sql](../chatbot_v2.sql), contiene l
 two_factor_method       varchar(20)  DEFAULT NULL,
 two_factor_secret       varchar(255) DEFAULT NULL,
 two_factor_enabled      tinyint(1)   NOT NULL DEFAULT 0,
-two_factor_last_counter bigint(20)  DEFAULT NULL
+two_factor_last_counter bigint(20)   DEFAULT NULL,
+two_factor_verified     tinyint(1)   NOT NULL DEFAULT 0
 ```
 
 Sus propósitos son:
@@ -130,6 +131,7 @@ Sus propósitos son:
 - `two_factor_secret`: secreto TOTP cifrado.
 - `two_factor_enabled`: indica si el autenticador se activó.
 - `two_factor_last_counter`: último intervalo TOTP aceptado; evita aceptar nuevamente un código ya consumido.
+- `two_factor_verified`: indica si la cuenta completó su verificación inicial. Las cuentas nuevas quedan en `0`; al verificar el primer código pasa a `1`.
 
 El archivo SQL prepara una base nueva. En una base existente hay que agregar solo las columnas que todavía no existan; volver a ejecutar un `ALTER TABLE` para columnas ya presentes produce un error.
 
@@ -145,7 +147,7 @@ $code = (string) random_int(100000, 999999);
 
 En una instalación local, `mail()` puede no estar configurado o puede aceptar el envío sin que el mensaje llegue a una dirección ficticia. En ese caso, la aplicación informa que el envío falló y muestra el código de prueba en la interfaz. En localhost también lo registra en la consola del navegador mientras el desafío email está pendiente.
 
-La implementación actual conserva el código en la sesión del servidor hasta que se completa, cancela o vence el desafío. Al verificarlo correctamente, elimina el estado pendiente y crea la sesión. No guarda los códigos email en una tabla ni aplica límite de intentos en esta versión.
+La implementación actual conserva el código en la sesión del servidor hasta que se completa, cancela o vence el desafío. Al verificarlo correctamente, elimina el estado pendiente y crea la sesión. No guarda los códigos email en una tabla. Sí limita el desafío email a cinco intentos incorrectos antes de cancelarlo y obligar a iniciar sesión nuevamente.
 
 Para un despliegue real conviene configurar un servicio SMTP y usar una librería de correo como PHPMailer, con credenciales en variables de entorno. La opción de depuración que muestra códigos debe permanecer desactivada fuera de desarrollo.
 
@@ -235,3 +237,103 @@ La solución cumple el flujo principal, pero se puede fortalecer en los siguient
 La aplicación implementa el flujo de autenticación en dos pasos con dos alternativas: código por correo y TOTP. La contraseña se verifica antes de iniciar el desafío y la sesión autenticada se crea después de una verificación correcta. La política actual deja opcional el 2FA para el rol normal y lo exige para los demás roles. Si una cuenta privilegiada elige `authenticator` y lo tiene activo, se solicita TOTP; si no, se usa email. Los secretos TOTP se cifran y los contadores usados se registran para evitar reutilización.
 
 La solución es adecuada como implementación funcional del trabajo práctico y cuenta con pruebas unitarias básicas. Para producción todavía necesita correo SMTP confiable, límites de intentos, recuperación de cuentas y pruebas de integración. La visualización de códigos de depuración es exclusivamente para desarrollo local y no debe estar habilitada en un entorno real.
+
+## 13. Evidencias visuales sugeridas
+
+Las siguientes imágenes o GIF deben insertarse dentro del informe entregado. Cada evidencia debe mostrar la fecha o el navegador completo, quitar datos reales y evitar mostrar secretos TOTP o claves de cifrado.
+
+### 13.1 Registro de una cuenta nueva
+
+[COLOCAR GIF 1: registrar una cuenta nueva usando el formulario de registro. Debe comenzar en la pantalla de registro y terminar con el mensaje de éxito y la redirección al login.]
+
+Este GIF demuestra que el sistema crea una cuenta nueva, almacena la contraseña hasheada y conserva su estado como pendiente de verificación inicial.
+
+### 13.2 Primer ingreso y solicitud del segundo factor
+
+[COLOCAR GIF 2: ingresar correo y contraseña correctos con una cuenta nueva. Debe mostrar la desactivación temporal del acceso al Dashboard y la aparición del campo de código.]
+
+Este GIF demuestra que validar usuario y contraseña no crea todavía una sesión autenticada completa.
+
+### 13.3 Código incorrecto y código vencido
+
+[COLOCAR IMAGEN 3A: resultado visible al ingresar un código email incorrecto.]
+
+[COLOCAR IMAGEN 3B: resultado visible después de esperar cinco minutos o modificar manualmente la sesión pendiente.]
+
+Las imágenes deben acompañarse de una breve explicación del resultado esperado y de los datos que no se muestran al usuario.
+
+### 13.4 Código email correcto
+
+[COLOCAR GIF 4: ingresar el código correcto recibido por email o mostrado únicamente por el mecanismo local de pruebas, completar la verificación y llegar al Dashboard.]
+
+En esta evidencia conviene grabar simultáneamente la pantalla del navegador y el correo local si existe un servidor SMTP disponible.
+
+### 13.5 Acceso directo bloqueado
+
+[COLOCAR GIF 5: intentar abrir directamente una URL protegida, por ejemplo `index.php?controller=chat&action=index`, sin haber iniciado sesión.]
+
+El GIF debe terminar en la pantalla de login, demostrando que el desafío pendiente o la ausencia de sesión no permiten ingresar al Dashboard.
+
+### 13.6 Login con credenciales inválidas
+
+[COLOCAR IMAGEN 6: escribir un email o contraseña incorrectos y mostrar el mensaje de error.]
+
+Debe quedar claro que no se genera ningún desafío ni se crea una sesión autenticada.
+
+### 13.7 Configuración de Google Authenticator
+
+[COLOCAR GIF 7: desde **Mi perfil**, confirmar la contraseña, mostrar el QR y la clave manual, escanear la cuenta en una aplicación autenticadora e ingresar el código de confirmación.]
+
+La clave manual y el QR deben taparse o desenfocarse en la versión entregada si muestran el secreto real.
+
+### 13.8 Inicio de sesión con TOTP
+
+[COLOCAR GIF 8: cerrar sesión, iniciar con correo y contraseña y verificar con un código generado por la aplicación autenticadora.]
+
+Este GIF debe mostrar que el código cambia, tiene una duración corta y permite entrar únicamente después de la verificación.
+
+### 13.9 Reutilización y desactivación
+
+[COLOCAR GIF 9: intentar reutilizar el mismo código TOTP y observar el rechazo; después, desde el perfil, desactivar TOTP ingresando contraseña y un código válido.]
+
+Si no es posible grabar ambas acciones juntas, entregar dos GIF cortos e indicar claramente dónde comienza y termina cada prueba.
+
+### 13.10 Resultados de pruebas automatizadas
+
+[COLOCAR IMAGEN 10: terminal con las dos pruebas ejecutadas correctamente.]
+
+```text
+Authenticator TOTP checks passed.
+2FA policy checks passed.
+```
+
+También se puede adjuntar una captura de la sintaxis PHP validada con `php -l`.
+
+## 14. Pruebas documentadas
+
+| Prueba | Datos utilizados | Resultado esperado | Resultado obtenido | Evidencia |
+|---|---|---|---|---|
+| Credenciales incorrectas | Email o contraseña inválida | No iniciar sesión ni crear desafío | Completar manualmente | Imagen 6 |
+| Cuenta nueva válida | Cuenta registrada recientemente | Solicitar código email | Completar manualmente | GIF 2 |
+| Código email correcto | Código vigente de seis dígitos | Crear sesión y redirigir al Dashboard | Completar manualmente | GIF 4 |
+| Código email incorrecto | Código diferente | Rechazar el código sin crear sesión | Completar manualmente | Imagen 3A |
+| Código email vencido | Desafío con más de cinco minutos | Eliminar desafío y pedir otro login | Completar manualmente | Imagen 3B |
+| Código ya utilizado | Reutilizar el mismo código | Rechazar reutilización | Completar manualmente | GIF 9 |
+| Acceso directo protegido | URL del chat sin sesión | Redirigir a login | Completar manualmente | GIF 5 |
+| Usuario normal sin 2FA | Cuenta normal con método `none` | Ingresar normalmente | Completar manualmente | GIF o imagen adicional |
+| Configuración TOTP | QR o clave manual | Activar el autenticador | Completar manualmente | GIF 7 |
+| Login TOTP correcto | Código vigente | Crear sesión y redirigir | Completar manualmente | GIF 8 |
+| Vector TOTP RFC 6238 | Vector temporal conocido | Retornar contador y código esperado | Pasó automáticamente | Imagen 10 |
+| Política por rol | Normal, administrador y cuenta sin rol | Aplicar reglas configuradas | Pasó automáticamente | Imagen 10 |
+
+## 15. Problemas encontrados
+
+Entre los problemas encontrados durante el desarrollo se pueden documentar, con capturas adicionales si corresponde:
+
+1. La base existente no tenía las columnas necesarias hasta ejecutar la migración SQL.
+2. `mail()` no entrega mensajes reales si XAMPP no tiene configurado SMTP o sendmail.
+3. Los secretos TOTP necesitan una clave `CHATBOT_TOTP_KEY` estable, ya que perderla impide descifrarlos.
+4. La diferencia de reloj entre el teléfono y el servidor puede generar códigos inválidos si no se sincroniza.
+5. Los navegadores o CDNs externos pueden bloquear el QR; por ello también se agregó una clave Base32 manual.
+6. Registrar inicialmente el secreto antes de confirmarlo podía dejar una cuenta parcialmente configurada si no se mantenía el desafío de inscripción; la configuración actual conserva el secreto temporalmente en sesión hasta confirmar.
+7. Las pruebas unitarias no reemplazan las pruebas manuales de correo, expiración y rutas protegidas.

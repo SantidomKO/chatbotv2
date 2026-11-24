@@ -20,6 +20,12 @@ class AuthController
 
     public function guardarRegistro()
     {
+        if (!$this->validarCsrf()) {
+            $_SESSION['error'] = 'La solicitud expiró. Intenta nuevamente.';
+            header('Location: index.php?controller=auth&action=registrar');
+            exit();
+        }
+
         $nombre = trim($_POST['nombre'] ?? '');
         $email = trim($_POST['email'] ?? '');
         $password = trim($_POST['password'] ?? '');
@@ -119,6 +125,7 @@ class AuthController
                         'code' => $code,
                         'mail_sent' => $mailSent,
                         'debug_code' => $code,
+                        'attempts' => 0,
                         'expires_at' => time() + 300,
                     ];
                     if (!$mailSent) {
@@ -155,7 +162,14 @@ class AuthController
 
         if (($pending['method'] ?? 'authenticator') === 'email') {
             $codigoIngresado = preg_replace('/\D+/', '', (string) ($_POST['code'] ?? ''));
+            if ((int) ($pending['attempts'] ?? 0) >= 5) {
+                unset($_SESSION['pending_2fa']);
+                $_SESSION['error'] = 'Se alcanzó el límite de intentos. Inicia sesión nuevamente.';
+                header('Location: index.php?controller=auth&action=login');
+                exit();
+            }
             if (!hash_equals((string) $pending['code'], $codigoIngresado)) {
+                $_SESSION['pending_2fa']['attempts'] = (int) ($_SESSION['pending_2fa']['attempts'] ?? 0) + 1;
                 $_SESSION['error'] = 'El código enviado por email no es válido o ya expiró.';
                 header('Location: index.php?controller=auth&action=login');
                 exit();
@@ -173,6 +187,12 @@ class AuthController
         unset($_SESSION['pending_2fa']);
         if (!$usuario) {
             $_SESSION['error'] = 'No se pudo verificar la cuenta. Inicia sesión nuevamente.';
+            header('Location: index.php?controller=auth&action=login');
+            exit();
+        }
+
+        if (!Usuario::marcarVerificado((int) $usuario->getId())) {
+            $_SESSION['error'] = 'No se pudo actualizar la verificación de la cuenta.';
             header('Location: index.php?controller=auth&action=login');
             exit();
         }
@@ -229,6 +249,11 @@ class AuthController
     private function resolverMetodo2FA($usuario): string
     {
         $authenticator = new Authenticator();
+
+        if (!Usuario::estaVerificado($usuario->getId())) {
+            return 'email';
+        }
+
         $metodoUsuario = Usuario::obtenerMetodo2FA($usuario->getId());
 
         if (!Usuario::requiere2FA($usuario)) {

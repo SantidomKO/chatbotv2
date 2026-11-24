@@ -24,14 +24,45 @@ class Usuario
     }
 
     public function guardar(){
-
         // Armamos la consulta SQL y guardamos la contraseña hasheada
         $hashedPassword = password_hash($this->password, PASSWORD_DEFAULT);
-        $sql="INSERT INTO usuarios (`nombre`, `email`, `password`, `id_rol`) VALUES (?, ?, ?, ?)";
+        $sql="INSERT INTO usuarios (`nombre`, `email`, `password`, `id_rol`, `two_factor_verified`) VALUES (?, ?, ?, ?, 0)";
         $stmt=$this->conexion->prepare($sql);
         $rolId = $this->rol ? $this->rol->getId() : null;
         $result = $stmt->execute([$this->nombre, $this->email, $hashedPassword, $rolId]);
         return $result ? $this->conexion->lastInsertId() : false;
+    }
+
+    public static function estaVerificado($userId): bool
+    {
+        if (!$userId) {
+            return false;
+        }
+
+        $conexion = Database::getInstance()->getConnection();
+        try {
+            $stmt = $conexion->prepare('SELECT two_factor_verified FROM usuarios WHERE id_usuario = ?');
+            $stmt->execute([(int) $userId]);
+            $resultado = $stmt->fetchColumn();
+            if ($resultado !== false) {
+                return (bool) $resultado;
+            }
+        } catch (Throwable $e) {
+            // Las bases anteriores se tratan como verificadas hasta ejecutar la migración.
+        }
+
+        return true;
+    }
+
+    public static function marcarVerificado($userId): bool
+    {
+        $conexion = Database::getInstance()->getConnection();
+        try {
+            $stmt = $conexion->prepare('UPDATE usuarios SET two_factor_verified = 1 WHERE id_usuario = ?');
+            return $stmt->execute([(int) $userId]);
+        } catch (Throwable $e) {
+            return false;
+        }
     }
 
     public function actualizar(){

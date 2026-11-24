@@ -27,6 +27,19 @@ IW+ySLvU+mfROL9PHmTCNuA4tlqzOUZLwMnTiyvwFCQ=
        ADD COLUMN `two_factor_last_counter` bigint(20) DEFAULT NULL;
     ```
 
+    Si todavía no existe la preferencia de método ni el estado de verificación inicial, agrega también:
+
+    ```sql
+    ALTER TABLE `usuarios`
+       ADD COLUMN `two_factor_method` varchar(20) DEFAULT NULL,
+       ADD COLUMN `two_factor_verified` tinyint(1) NOT NULL DEFAULT 0;
+
+    UPDATE `usuarios` SET `two_factor_verified` = 1
+    WHERE `id_usuario` IS NOT NULL;
+    ```
+
+    En una base existente con cuentas reales, marca las cuentas como verificadas solo después de confirmar que ya realizaron el primer ingreso. Si quieres probar la condición de usuario nuevo, crea o deja una cuenta en `two_factor_verified = 0`.
+
     No vuelvas a ejecutar estas sentencias si las columnas ya existen.
 5. Ejecuta la prueba autónoma: `C:\xampp\php\php.exe tests\test_authenticator.php`.
 

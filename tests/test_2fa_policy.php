@@ -47,4 +47,14 @@ if (Usuario::normalizarMetodo2FA('none') !== 'none') {
     throw new RuntimeException('El valor none debe quedar permitido para usuarios que no quieran 2FA.');
 }
 
+$metodoReflection = new ReflectionMethod(Usuario::class, 'estaVerificado');
+if (!$metodoReflection->isStatic()) {
+    throw new RuntimeException('La verificación inicial debe consultarse desde el modelo como una operación de usuario.');
+}
+
+$metodoReflection = new ReflectionMethod(Usuario::class, 'marcarVerificado');
+if (!$metodoReflection->isStatic()) {
+    throw new RuntimeException('La verificación inicial debe actualizarse desde el modelo como una operación de usuario.');
+}
+
 echo "2FA policy checks passed.\n";

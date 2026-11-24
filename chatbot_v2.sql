@@ -336,16 +336,17 @@ CREATE TABLE `usuarios` (
   `two_factor_secret` varchar(255) DEFAULT NULL,
   `two_factor_enabled` tinyint(1) NOT NULL DEFAULT 0,
   `two_factor_last_counter` bigint(20) DEFAULT NULL,
-  `two_factor_method` varchar(20) DEFAULT NULL
+  `two_factor_method` varchar(20) DEFAULT NULL,
+  `two_factor_verified` tinyint(1) NOT NULL DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Volcado de datos para la tabla `usuarios`
 --
 
-INSERT INTO `usuarios` (`id_usuario`, `nombre`, `email`, `password`, `id_rol`) VALUES
-(2, 'Administrador', 'admin@epet3.edu.ar', '$2y$10$2G.aenOGFPEX2vr204wFluy49yk9X3lZZt6oyVP.sSTDKzzkv2psi', 1),
-(3, 'Usuario Normal', 'user@epet3.edu.ar', '$2y$10$94xRUXFIkGYazBFQ9U7cIO6VlJG78p.RKDmtXFrtLBU1j7dhWStLG', 2);
+INSERT INTO `usuarios` (`id_usuario`, `nombre`, `email`, `password`, `id_rol`, `two_factor_verified`) VALUES
+(2, 'Administrador', 'admin@epet3.edu.ar', '$2y$10$2G.aenOGFPEX2vr204wFluy49yk9X3lZZt6oyVP.sSTDKzzkv2psi', 1, 1),
+(3, 'Usuario Normal', 'user@epet3.edu.ar', '$2y$10$94xRUXFIkGYazBFQ9U7cIO6VlJG78p.RKDmtXFrtLBU1j7dhWStLG', 2, 1);
 
 --
 -- Índices para tablas volcadas

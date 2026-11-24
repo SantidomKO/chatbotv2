@@ -15,6 +15,7 @@
             <?php unset($_SESSION['error']); ?>
         <?php endif; ?>
         <form action="index.php?controller=auth&action=guardarRegistro" method="POST" class="auth-form">
+            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token']) ?>">
             <div class="form-group">
                 <label>Nombre</label>
                 <input type="text" name="nombre" required>
